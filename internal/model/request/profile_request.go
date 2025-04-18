@@ -2,7 +2,7 @@ package request
 
 type CreateProfileRequest struct {
 	Name      string `json:"name" binding:"required"`
-	AvatarUrl string `json:"avatarUrl"`
+	AvatarUrl string `json:"avatar_url"`
 }
 
 type UpdateProfileRequest struct {

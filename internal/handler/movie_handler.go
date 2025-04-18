@@ -75,12 +75,18 @@ func (h *MovieHandler) Update(c *gin.Context) {
 }
 
 func (h *MovieHandler) Delete(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
 
-	if err := h.Usecase.Delete(uint(id)); err != nil {
+	err = h.Usecase.Delete(uint(id))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar la película"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Película eliminada"})
+	c.JSON(http.StatusOK, gin.H{"message": "Película eliminada correctamente"})
 }
