@@ -15,17 +15,16 @@ var DB *gorm.DB
 func Connect() {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		log.Fatal("DATABASE_URL no está definido en el entorno")
+		log.Fatal("🔴 DATABASE_URL no está definido en el entorno")
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error al conectar con la base de datos: %v", err)
+		log.Fatalf("🔴 Error al conectar con la base de datos: %v", err)
 	}
 
-	log.Println("✅ Conectado a la base de datos")
+	log.Println("🟢 Conectado a la base de datos")
 
-	// Auto migración de modelos
 	err = db.AutoMigrate(
 		&domain.User{},
 		&domain.Profile{},
@@ -36,7 +35,7 @@ func Connect() {
 	)
 
 	if err != nil {
-		log.Fatalf("❌ Error al hacer migraciones: %v", err)
+		log.Fatalf("🔴 Error al hacer migraciones: %v", err)
 	}
 
 	DB = db

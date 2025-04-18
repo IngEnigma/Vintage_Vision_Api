@@ -9,4 +9,6 @@ type Party struct {
 	PartyCode string `gorm:"uniqueIndex"`
 	CreatedAt time.Time
 	ExpiresAt time.Time
+
+	Members []PartyMember
 }

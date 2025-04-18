@@ -8,8 +8,9 @@ type Movie struct {
 	Description string
 	Year        int
 	Genre       string
-	PosterURL   string
-	VideoURL    string `gorm:"not null"`
+	ImageURL    string
+	StreamURL   string `gorm:"not null"`
+	Duration    int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
