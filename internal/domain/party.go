@@ -10,5 +10,7 @@ type Party struct {
 	CreatedAt time.Time
 	ExpiresAt time.Time
 
-	Members []PartyMember
+	Movie   Movie         `gorm:"foreignKey:MovieID"`
+	Host    User          `gorm:"foreignKey:HostID"`
+	Members []PartyMember `gorm:"foreignKey:PartyID"`
 }

@@ -1,29 +1,26 @@
 package db
 
 import (
-	"log"
-	"os"
+	"fmt"
+
+	"vintage-vision-api/infrastructure/config"
+	"vintage-vision-api/internal/domain"
+	"vintage-vision-api/internal/utils"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"vintage-vision-api/internal/domain"
 )
 
-var DB *gorm.DB
+type DBConnection struct {
+	*gorm.DB
+}
 
-func Connect() {
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		log.Fatal("🔴 DATABASE_URL no está definido en el entorno")
-	}
-
+func NewDBConnection(dsn string) (*DBConnection, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("🔴 Error al conectar con la base de datos: %v", err)
+		utils.Logger.Errorf("Error al conectar con la base de datos: %v", err)
+		return nil, fmt.Errorf("error al conectar con la base de datos: %w", err)
 	}
-
-	log.Println("🟢 Conectado a la base de datos")
 
 	err = db.AutoMigrate(
 		&domain.User{},
@@ -33,10 +30,15 @@ func Connect() {
 		&domain.Party{},
 		&domain.PartyMember{},
 	)
-
 	if err != nil {
-		log.Fatalf("🔴 Error al hacer migraciones: %v", err)
+		utils.Logger.Errorf("Error al hacer migraciones: %v", err)
+		return nil, fmt.Errorf("error al hacer migraciones: %w", err)
 	}
 
-	DB = db
+	utils.Logger.Info("Conectado y migraciones ejecutadas correctamente")
+	return &DBConnection{db}, nil
+}
+
+func Connect(cfg *config.Config) (*DBConnection, error) {
+	return NewDBConnection(cfg.DatabaseURL)
 }
