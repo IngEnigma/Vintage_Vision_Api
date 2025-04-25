@@ -3,6 +3,9 @@ package handler
 import (
 	"net/http"
 	"strconv"
+
+	"vintage-vision-api/internal/cloudinary"
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/model/request"
 	"vintage-vision-api/internal/model/response"
 	"vintage-vision-api/internal/usecase"
@@ -20,10 +23,11 @@ func NewMovieHandler(u *usecase.MovieUsecase) *MovieHandler {
 }
 
 func (h *MovieHandler) GetAll(c *gin.Context) {
-	movies, err := h.Usecase.GetAll()
+	ctx := c.Request.Context()
+
+	movies, err := h.Usecase.GetAll(ctx, 10, 0)
 	if err != nil {
-		utils.Logger.Errorf("Error al obtener las películas: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudieron obtener las películas, detalles: " + err.Error()})
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgGetMovies, err)
 		return
 	}
 
@@ -46,64 +50,170 @@ func (h *MovieHandler) GetAll(c *gin.Context) {
 }
 
 func (h *MovieHandler) Create(c *gin.Context) {
-	var req request.CreateMovieRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.Logger.Warnf("Error al bindear los datos para crear la película: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos, detalles: " + err.Error()})
+	ctx := c.Request.Context()
+
+	title := c.PostForm("title")
+	description := c.PostForm("description")
+	year, err := strconv.Atoi(c.PostForm("year"))
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidYear, err)
+		return
+	}
+	genre := c.PostForm("genre")
+	duration, err := strconv.Atoi(c.PostForm("duration"))
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidDuration, err)
 		return
 	}
 
-	if err := h.Usecase.Create(req); err != nil {
-		utils.Logger.Errorf("Error al crear la película: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo crear la película, detalles: " + err.Error()})
+	imageFile, err := c.FormFile("image")
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgUploadImage, err)
+		return
+	}
+	videoFile, err := c.FormFile("video")
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgUploadVideo, err)
 		return
 	}
 
-	utils.Logger.Infof("Película creada: %s", req.Title)
-	c.JSON(http.StatusCreated, gin.H{"message": "Película creada"})
+	image, err := imageFile.Open()
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgOpenImage, err)
+		return
+	}
+	defer image.Close()
+
+	video, err := videoFile.Open()
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgOpenVideo, err)
+		return
+	}
+	defer video.Close()
+
+	imageURL, err := cloudinary.UploadImageToCloudinary(image, imageFile.Filename)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgUploadImage, err)
+		return
+	}
+	videoURL, err := cloudinary.UploadVideoToCloudinary(video, videoFile.Filename)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgUploadVideo, err)
+		return
+	}
+
+	req := request.CreateMovieRequest{
+		Title:       title,
+		Description: description,
+		Year:        year,
+		ImageURL:    imageURL,
+		StreamURL:   videoURL,
+		Genre:       genre,
+		Duration:    duration,
+	}
+
+	if _, err := h.Usecase.Create(ctx, req); err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgCreateMovie, err)
+		return
+	}
+
+	utils.Logger.Infof(constants.MsgMovieCreatedSuccessfully)
+	c.JSON(http.StatusCreated, gin.H{"message": constants.MsgMovieCreatedSuccessfully})
 }
 
 func (h *MovieHandler) Update(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.Logger.Warnf("ID inválido para actualizar película: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido, detalles: " + err.Error()})
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidID, err)
 		return
+	}
+
+	if c.Request.MultipartForm == nil {
+		if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
+			utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgParseForm, err)
+			return
+		}
 	}
 
 	var req request.UpdateMovieRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.Logger.Warnf("Error al bindear los datos para actualizar la película: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos, detalles: " + err.Error()})
+
+	if val := c.PostForm("title"); val != "" {
+		req.Title = &val
+	}
+	if val := c.PostForm("description"); val != "" {
+		req.Description = &val
+	}
+	if val := c.PostForm("year"); val != "" {
+		if year, err := strconv.Atoi(val); err == nil {
+			req.Year = &year
+		} else {
+			utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidYear, err)
+			return
+		}
+	}
+	if val := c.PostForm("genre"); val != "" {
+		req.Genre = &val
+	}
+	if val := c.PostForm("duration"); val != "" {
+		if dur, err := strconv.Atoi(val); err == nil {
+			req.Duration = &dur
+		} else {
+			utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidDuration, err)
+			return
+		}
+	}
+
+	if imageFile, err := c.FormFile("image"); err == nil {
+		image, _ := imageFile.Open()
+		defer image.Close()
+
+		imageURL, err := cloudinary.UploadImageToCloudinary(image, imageFile.Filename)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgUploadImage, err)
+			return
+		}
+		req.ImageURL = &imageURL
+	}
+
+	if videoFile, err := c.FormFile("video"); err == nil {
+		video, _ := videoFile.Open()
+		defer video.Close()
+
+		videoURL, err := cloudinary.UploadVideoToCloudinary(video, videoFile.Filename)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgUploadVideo, err)
+			return
+		}
+		req.StreamURL = &videoURL
+	}
+
+	if _, err := h.Usecase.Update(ctx, uint(id), req); err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgUpdateMovie, err)
 		return
 	}
 
-	if err := h.Usecase.Update(uint(id), req); err != nil {
-		utils.Logger.Errorf("Error al actualizar la película con ID %d: %v", id, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo actualizar la película, detalles: " + err.Error()})
-		return
-	}
-
-	utils.Logger.Infof("Película con ID %d actualizada con éxito", id)
-	c.JSON(http.StatusOK, gin.H{"message": "Película actualizada"})
+	utils.Logger.Infof(constants.MsgMovieUpdatedSuccessfully)
+	c.JSON(http.StatusOK, gin.H{"message": constants.MsgMovieUpdatedSuccessfully})
 }
 
 func (h *MovieHandler) Delete(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		utils.Logger.Warnf("ID inválido para eliminar película: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido, detalles: " + err.Error()})
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidID, err)
 		return
 	}
 
-	err = h.Usecase.Delete(uint(id))
+	err = h.Usecase.Delete(ctx, uint(id))
 	if err != nil {
-		utils.Logger.Errorf("Error al eliminar la película con ID %d: %v", id, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar la película, detalles: " + err.Error()})
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgDeleteMovie, err)
 		return
 	}
 
-	utils.Logger.Infof("Película con ID %d eliminada correctamente", id)
-	c.JSON(http.StatusOK, gin.H{"message": "Película eliminada correctamente"})
+	utils.Logger.Infof(constants.MsgMovieDeletedSuccessfully)
+	c.JSON(http.StatusOK, gin.H{"message": constants.MsgMovieDeletedSuccessfully})
 }

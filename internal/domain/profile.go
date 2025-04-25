@@ -1,14 +1,27 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"vintage-vision-api/internal/constants"
+
+	"gorm.io/gorm"
+)
 
 type Profile struct {
-	ID        uint   `gorm:"primaryKey"`
+	gorm.Model
 	Name      string `gorm:"not null"`
 	AvatarURL string
 	UserID    uint `gorm:"not null;index"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
 
 	WatchHistory []WatchHistory `gorm:"foreignKey:ProfileID"`
+}
+
+func (p *Profile) Validate() error {
+	if p.Name == "" {
+		return errors.New(constants.ErrMshEmptyProfileName)
+	}
+	if p.UserID == 0 {
+		return errors.New(constants.ErrMsgEmptyProfileId)
+	}
+	return nil
 }

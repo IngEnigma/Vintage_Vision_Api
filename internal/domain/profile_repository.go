@@ -1,9 +1,11 @@
 package domain
 
+import "context"
+
 type ProfileRepository interface {
-	Create(profile *Profile) error
-	FindByUser(userID uint) ([]Profile, error)
-	DeleteByID(profileID uint, userID uint) error
-	Update(profile *Profile) error
-	FindByIDAndUser(profileID, userID uint) (*Profile, error)
+	Create(ctx context.Context, profile *Profile) error
+	FindByUser(ctx context.Context, userID uint) ([]Profile, error)
+	DeleteByID(ctx context.Context, profileID uint, userID uint) error
+	Update(ctx context.Context, profile *Profile) error
+	FindByIDAndUser(ctx context.Context, profileID, userID uint) (*Profile, error)
 }

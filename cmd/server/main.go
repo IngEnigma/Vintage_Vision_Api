@@ -4,6 +4,7 @@ import (
 	"vintage-vision-api/infrastructure/config"
 	"vintage-vision-api/infrastructure/db"
 	"vintage-vision-api/infrastructure/router"
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/handler"
 	"vintage-vision-api/internal/usecase"
 	"vintage-vision-api/internal/utils"
@@ -14,16 +15,24 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		utils.Logger.Warn("No se encontró el archivo .env, usando variables de entorno del sistema")
+		utils.Logger.Warn(constants.ErrMsgMissingEnvVar)
 	}
 
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		utils.Logger.Fatalf("Error al cargar configuración: %v", err)
+	}
+
+	if err := config.InitCloudinary(); err != nil {
+		utils.Logger.Fatalf("%s: %v", constants.ErrMsgInitCloudinary, err)
+	}
+	utils.Logger.Info(constants.MsgCloudinarySuccess)
 
 	dbConn, err := db.Connect(cfg)
 	if err != nil {
-		utils.Logger.Fatalf("No se pudo conectar a la base de datos: %v", err)
+		utils.Logger.Fatalf("%s: %v", constants.ErrMsgDBConnection, err)
 	}
-	utils.Logger.Info("Conexión a la base de datos exitosa")
+	utils.Logger.Info(constants.MsgDBConnectionSuccess)
 
 	userRepo := repository.NewUserRepo(dbConn.DB)
 	userUC := usecase.NewUserUsecase(userRepo)
@@ -39,8 +48,8 @@ func main() {
 
 	r := router.SetupRouter(authHandler, profileHandler, movieHandler)
 
-	utils.Logger.Info("Servidor iniciado en http://localhost:8080")
+	utils.Logger.Info(constants.MsgServerStartedSuccessfully)
 	if err := r.Run(":8080"); err != nil {
-		utils.Logger.Fatalf("Error al iniciar el servidor: %v", err)
+		utils.Logger.Fatalf("%s: %v", constants.ErrMsgServerStart, err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"vintage-vision-api/infrastructure/config"
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
 
@@ -18,8 +19,8 @@ type DBConnection struct {
 func NewDBConnection(dsn string) (*DBConnection, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		utils.Logger.Errorf("Error al conectar con la base de datos: %v", err)
-		return nil, fmt.Errorf("error al conectar con la base de datos: %w", err)
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgDBConnection, err)
+		return nil, fmt.Errorf("%s: %w", constants.ErrMsgDBConnection, err)
 	}
 
 	err = db.AutoMigrate(
@@ -31,11 +32,11 @@ func NewDBConnection(dsn string) (*DBConnection, error) {
 		&domain.PartyMember{},
 	)
 	if err != nil {
-		utils.Logger.Errorf("Error al hacer migraciones: %v", err)
-		return nil, fmt.Errorf("error al hacer migraciones: %w", err)
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgDBMigration, err)
+		return nil, fmt.Errorf("%s: %w", constants.ErrMsgDBMigration, err)
 	}
 
-	utils.Logger.Info("Conectado y migraciones ejecutadas correctamente")
+	utils.Logger.Info(constants.MsgDBMigrationSuccess)
 	return &DBConnection{db}, nil
 }
 

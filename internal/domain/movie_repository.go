@@ -1,10 +1,12 @@
 package domain
 
+import "context"
+
 type MovieRepository interface {
-	GetAll() ([]Movie, error)
-	Create(movie *Movie) error
-	GetByID(id uint) (*Movie, error)
-	Update(movie *Movie) error
-	Delete(id uint) error
-	UpdateFields(id uint, updates map[string]interface{}) error
+	GetAll(ctx context.Context, limit, offset int) ([]Movie, error)
+	GetByID(ctx context.Context, id uint) (*Movie, error)
+	Create(ctx context.Context, movie *Movie) error
+	Update(ctx context.Context, movie *Movie) error
+	UpdateFields(ctx context.Context, id uint, updates map[string]interface{}) error
+	Delete(ctx context.Context, id uint) error
 }

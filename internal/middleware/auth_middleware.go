@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"vintage-vision-api/internal/constants"
+	"vintage-vision-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -13,7 +15,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token faltante o malformado"})
+			utils.HandleError(c, http.StatusUnauthorized, constants.ErrMissingOrMalformedToken, nil)
 			c.Abort()
 			return
 		}
@@ -26,20 +28,20 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
+			utils.HandleError(c, http.StatusUnauthorized, constants.ErrInvalidToken, err)
 			c.Abort()
 			return
 		}
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Algoritmo de firma inválido"})
+			utils.HandleError(c, http.StatusUnauthorized, constants.ErrInvalidSigningMethod, nil)
 			c.Abort()
 			return
 		}
 
-		userID, ok := claims["user_id"].(float64)
+		userIDFloat, ok := claims["user_id"].(float64)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
+			utils.HandleError(c, http.StatusUnauthorized, constants.ErrInvalidToken, nil)
 			c.Abort()
 			return
 		}
@@ -49,9 +51,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			isAdmin = false
 		}
 
-		c.Set("user_id", uint(userID))
+		c.Set("user_id", uint(userIDFloat))
 		c.Set("is_admin", isAdmin)
-
 		c.Next()
 	}
 }
@@ -60,7 +61,7 @@ func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		isAdmin, exists := c.Get("is_admin")
 		if !exists || isAdmin != true {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Requiere permisos de administrador"})
+			utils.HandleError(c, http.StatusForbidden, constants.ErrAdminOnly, nil)
 			c.Abort()
 			return
 		}

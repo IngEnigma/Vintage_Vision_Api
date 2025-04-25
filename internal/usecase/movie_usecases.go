@@ -1,6 +1,10 @@
 package usecase
 
 import (
+	"context"
+	"errors"
+
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/model/request"
 	"vintage-vision-api/internal/utils"
@@ -14,17 +18,17 @@ func NewMovieUsecase(r domain.MovieRepository) *MovieUsecase {
 	return &MovieUsecase{Repo: r}
 }
 
-func (u *MovieUsecase) GetAll() ([]domain.Movie, error) {
-	movies, err := u.Repo.GetAll()
+func (u *MovieUsecase) GetAll(ctx context.Context, limit, offset int) ([]domain.Movie, error) {
+	movies, err := u.Repo.GetAll(ctx, limit, offset)
 	if err != nil {
-		utils.Logger.Errorf("Error al obtener las películas: %v", err)
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetMovies, err)
 		return nil, err
 	}
-	utils.Logger.Infof("Películas obtenidas correctamente, total: %d", len(movies))
+	utils.Logger.Infof("%s, total: %d", constants.MsgMoviesRetrievedSuccessfully, len(movies))
 	return movies, nil
 }
 
-func (u *MovieUsecase) Create(req request.CreateMovieRequest) error {
+func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieRequest) (*domain.Movie, error) {
 	movie := domain.Movie{
 		Title:       req.Title,
 		Description: req.Description,
@@ -35,16 +39,16 @@ func (u *MovieUsecase) Create(req request.CreateMovieRequest) error {
 		Duration:    req.Duration,
 	}
 
-	err := u.Repo.Create(&movie)
-	if err != nil {
-		utils.Logger.Errorf("Error al crear la película '%s': %v", req.Title, err)
-		return err
+	if err := u.Repo.Create(ctx, &movie); err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgCreateMovie, err)
+		return nil, err
 	}
-	utils.Logger.Infof("Película '%s' creada con éxito", req.Title)
-	return nil
+
+	utils.Logger.Infof("%s: '%s'", constants.MsgMovieCreatedSuccessfully, movie.Title)
+	return &movie, nil
 }
 
-func (u *MovieUsecase) Update(id uint, req request.UpdateMovieRequest) error {
+func (u *MovieUsecase) Update(ctx context.Context, id uint, req request.UpdateMovieRequest) (*domain.Movie, error) {
 	updates := map[string]interface{}{}
 
 	if req.Title != nil {
@@ -70,26 +74,30 @@ func (u *MovieUsecase) Update(id uint, req request.UpdateMovieRequest) error {
 	}
 
 	if len(updates) == 0 {
-		utils.Logger.Warnf("No se recibieron campos para actualizar en la película con ID %d", id)
-		return nil
+		utils.Logger.Warnf("No se recibieron campos para actualizar la película ID %d", id)
+		return nil, errors.New("no se proporcionaron datos para actualizar")
 	}
 
-	err := u.Repo.UpdateFields(id, updates)
+	if err := u.Repo.UpdateFields(ctx, id, updates); err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgUpdateMovie, err)
+		return nil, err
+	}
+
+	updatedMovie, err := u.Repo.GetByID(ctx, id)
 	if err != nil {
-		utils.Logger.Errorf("Error al actualizar la película con ID %d: %v", id, err)
-		return err
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetUpdatedMovie, err)
+		return nil, err
 	}
 
-	utils.Logger.Infof("Película con ID %d actualizada con éxito", id)
-	return nil
+	utils.Logger.Infof("%s con ID %d", constants.MsgMovieUpdatedSuccessfully, id)
+	return updatedMovie, nil
 }
 
-func (u *MovieUsecase) Delete(id uint) error {
-	err := u.Repo.Delete(id)
-	if err != nil {
-		utils.Logger.Errorf("Error al eliminar la película con ID %d: %v", id, err)
+func (u *MovieUsecase) Delete(ctx context.Context, id uint) error {
+	if err := u.Repo.Delete(ctx, id); err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgDeleteMovie, err)
 		return err
 	}
-	utils.Logger.Infof("Película con ID %d eliminada correctamente", id)
+	utils.Logger.Infof("%s con ID %d", constants.MsgMovieDeletedSuccessfully, id)
 	return nil
 }
