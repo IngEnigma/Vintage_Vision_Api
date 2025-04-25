@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"context"
+
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
 
@@ -15,27 +18,28 @@ func NewUserRepo(db *gorm.DB) domain.UserRepository {
 	return &UserRepo{DB: db}
 }
 
-func (r *UserRepo) Create(user *domain.User) error {
-	err := r.DB.Create(user).Error
+func (r *UserRepo) Create(ctx context.Context, user *domain.User) error {
+	err := r.DB.WithContext(ctx).Create(user).Error
 	if err != nil {
-		utils.Logger.Errorf("Error al crear el usuario en la base de datos (%s): %v", user.Email, err)
+		utils.Logger.Errorf("%s (%s): %v", constants.ErrMsgCreateUser, user.Email, err)
 	} else {
-		utils.Logger.Infof("Usuario creado en la base de datos: %s", user.Email)
+		utils.Logger.Infof("%s: %s", constants.MsgUserCreatedSuccessfully, user.Email)
 	}
 	return err
 }
 
-func (r *UserRepo) FindByEmail(email string) (*domain.User, error) {
+func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
-	err := r.DB.Where("email = ?", email).First(&user).Error
+	err := r.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			utils.Logger.Warnf("Usuario no encontrado con el email: %s", email)
+			utils.Logger.Warnf("%s: %s", constants.ErrMsgUserNotFoundByEmail, email)
 		} else {
-			utils.Logger.Errorf("Error al buscar usuario con el email: %s. Error: %v", email, err)
+			utils.Logger.Errorf("%s: %s. Error: %v", constants.ErrMsgFindUserByEmail, email, err)
 		}
 		return nil, err
 	}
-	utils.Logger.Infof("Usuario encontrado por email: %s", email)
+
+	utils.Logger.Infof("%s: %s", constants.MsgUserFoundByEmail, email)
 	return &user, nil
 }

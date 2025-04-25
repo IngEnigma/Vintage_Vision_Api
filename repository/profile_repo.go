@@ -1,11 +1,16 @@
 package repository
 
 import (
+	"context"
+
+	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
 
 	"gorm.io/gorm"
 )
+
+var ErrProfileNotFound = gorm.ErrRecordNotFound
 
 type ProfileRepo struct {
 	DB *gorm.DB
@@ -15,60 +20,83 @@ func NewProfileRepo(db *gorm.DB) domain.ProfileRepository {
 	return &ProfileRepo{DB: db}
 }
 
-func (r *ProfileRepo) Create(profile *domain.Profile) error {
-	err := r.DB.Create(profile).Error
-	if err != nil {
-		utils.Logger.Errorf("Error al crear el perfil para el usuario ID (%d): %v", profile.UserID, err)
-	} else {
-		utils.Logger.Infof("Perfil creado para el usuario ID (%d)", profile.UserID)
+func (r *ProfileRepo) Create(ctx context.Context, profile *domain.Profile) error {
+	if err := profile.Validate(); err != nil {
+		utils.Logger.Warnf("validation failed: %v", err)
+		return err
 	}
-	return err
+
+	err := r.DB.WithContext(ctx).Create(profile).Error
+	if err != nil {
+		utils.Logger.Errorf("%s: userID=%d, error=%v", constants.ErrMsgRegisterProfile, profile.UserID, err)
+		return err
+	}
+
+	utils.Logger.Infof("%s: ID=%d, userID=%d", constants.MsgProfileCreatedSuccessfully, profile.ID, profile.UserID)
+	return nil
 }
 
-func (r *ProfileRepo) FindByUser(userID uint) ([]domain.Profile, error) {
+func (r *ProfileRepo) FindByUser(ctx context.Context, userID uint) ([]domain.Profile, error) {
 	var profiles []domain.Profile
-	err := r.DB.Where("user_id = ?", userID).Find(&profiles).Error
+	err := r.DB.WithContext(ctx).Where("user_id = ?", userID).Find(&profiles).Error
 	if err != nil {
-		utils.Logger.Errorf("Error al obtener perfiles para el usuario ID (%d): %v", userID, err)
-	} else {
-		utils.Logger.Infof("Perfiles obtenidos para el usuario ID (%d)", userID)
-	}
-	return profiles, err
-}
-
-func (r *ProfileRepo) DeleteByID(profileID uint, userID uint) error {
-	result := r.DB.Where("id = ? AND user_id = ?", profileID, userID).Delete(&domain.Profile{})
-	if result.RowsAffected == 0 {
-		utils.Logger.Warnf("No se encontró el perfil con ID (%d) para el usuario ID (%d) o no se tiene permiso para eliminarlo", profileID, userID)
-		return gorm.ErrRecordNotFound
-	}
-
-	utils.Logger.Infof("Perfil con ID (%d) eliminado para el usuario ID (%d)", profileID, userID)
-	return result.Error
-}
-
-func (r *ProfileRepo) Update(profile *domain.Profile) error {
-	err := r.DB.Save(profile).Error
-	if err != nil {
-		utils.Logger.Errorf("Error al actualizar el perfil con ID (%d): %v", profile.ID, err)
-	} else {
-		utils.Logger.Infof("Perfil con ID (%d) actualizado", profile.ID)
-	}
-	return err
-}
-
-func (r *ProfileRepo) FindByIDAndUser(profileID, userID uint) (*domain.Profile, error) {
-	var profile domain.Profile
-	err := r.DB.Where("id = ? AND user_id = ?", profileID, userID).First(&profile).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			utils.Logger.Warnf("Perfil no encontrado con ID (%d) para el usuario ID (%d)", profileID, userID)
-		} else {
-			utils.Logger.Errorf("Error al obtener el perfil con ID (%d) para el usuario ID (%d): %v", profileID, userID, err)
-		}
+		utils.Logger.Errorf("%s: userID=%d, error=%v", constants.ErrMsgGetProfiles, userID, err)
 		return nil, err
 	}
 
-	utils.Logger.Infof("Perfil con ID (%d) encontrado para el usuario ID (%d)", profileID, userID)
+	utils.Logger.Infof("%s: userID=%d", constants.MsgProfilesRetrievedSuccessfully, userID)
+	return profiles, nil
+}
+
+func (r *ProfileRepo) DeleteByID(ctx context.Context, profileID, userID uint) error {
+	result := r.DB.WithContext(ctx).Where("id = ? AND user_id = ?", profileID, userID).Delete(&domain.Profile{})
+	if result.Error != nil {
+		utils.Logger.Errorf("%s: profileID=%d, userID=%d, error=%v", constants.ErrMsgDeleteProfile, profileID, userID, result.Error)
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		utils.Logger.Warnf("%s: profileID=%d, userID=%d", constants.ErrMsgProfileNotFound, profileID, userID)
+		return ErrProfileNotFound
+	}
+
+	utils.Logger.Infof("%s: profileID=%d, userID=%d", constants.MsgProfileDeletedSuccessfully, profileID, userID)
+	return nil
+}
+
+func (r *ProfileRepo) Update(ctx context.Context, profile *domain.Profile) error {
+	if err := profile.Validate(); err != nil {
+		utils.Logger.Warnf("validation failed: %v", err)
+		return err
+	}
+
+	result := r.DB.WithContext(ctx).Save(profile)
+	if result.Error != nil {
+		utils.Logger.Errorf("%s: profileID=%d, error=%v", constants.ErrMsgUpdateProfile, profile.ID, result.Error)
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		utils.Logger.Warnf("%s: profileID=%d", constants.ErrMsgProfileNotFound, profile.ID)
+		return ErrProfileNotFound
+	}
+
+	utils.Logger.Infof("%s: profileID=%d", constants.MsgProfileUpdatedSuccessfully, profile.ID)
+	return nil
+}
+
+func (r *ProfileRepo) FindByIDAndUser(ctx context.Context, profileID, userID uint) (*domain.Profile, error) {
+	var profile domain.Profile
+	err := r.DB.WithContext(ctx).Where("id = ? AND user_id = ?", profileID, userID).First(&profile).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			utils.Logger.Warnf("%s: profileID=%d, userID=%d", constants.ErrMsgProfileNotFound, profileID, userID)
+			return nil, ErrProfileNotFound
+		}
+		utils.Logger.Errorf("%s: profileID=%d, userID=%d, error=%v", constants.ErrMsgGetProfile, profileID, userID, err)
+		return nil, err
+	}
+
+	utils.Logger.Infof("%s: profileID=%d, userID=%d", constants.MsgProfileRetrievedSuccessfully, profileID, userID)
 	return &profile, nil
 }
