@@ -3,8 +3,8 @@ package domain
 import "time"
 
 type PartyMember struct {
-	ID        uint `gorm:"primaryKey"`
-	PartyID   uint `gorm:"not null"`
-	ProfileID uint `gorm:"not null"`
+	ID        uint
+	PartyID   uint
+	ProfileID uint
 	JoinedAt  time.Time
 }

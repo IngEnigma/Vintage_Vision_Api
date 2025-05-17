@@ -74,8 +74,8 @@ func (u *MovieUsecase) Update(ctx context.Context, id uint, req request.UpdateMo
 	}
 
 	if len(updates) == 0 {
-		utils.Logger.Warnf("No se recibieron campos para actualizar la película ID %d", id)
-		return nil, errors.New("no se proporcionaron datos para actualizar")
+		utils.Logger.Warnf("%s: %d", constants.ErrMsgUpdateMovieFields, id)
+		return nil, errors.New(constants.ErrMsgUpdateMovieFields)
 	}
 
 	if err := u.Repo.UpdateFields(ctx, id, updates); err != nil {

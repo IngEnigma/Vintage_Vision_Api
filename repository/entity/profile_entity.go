@@ -1,17 +1,19 @@
-package domain
+package entity
 
 import (
 	"errors"
 	"vintage-vision-api/internal/constants"
+
+	"gorm.io/gorm"
 )
 
 type Profile struct {
-	ID        uint
-	Name      string
+	gorm.Model
+	Name      string `gorm:"not null"`
 	AvatarURL string
-	UserID    uint
+	UserID    uint `gorm:"not null;index"`
 
-	WatchHistory []WatchHistory
+	WatchHistory []WatchHistory `gorm:"foreignKey:ProfileID"`
 }
 
 func (p *Profile) Validate() error {

@@ -6,6 +6,8 @@ import (
 	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
+	"vintage-vision-api/repository/entity"
+	"vintage-vision-api/repository/mapper"
 
 	"gorm.io/gorm"
 )
@@ -21,35 +23,38 @@ func NewProfileRepo(db *gorm.DB) domain.ProfileRepository {
 }
 
 func (r *ProfileRepo) Create(ctx context.Context, profile *domain.Profile) error {
-	if err := profile.Validate(); err != nil {
-		utils.Logger.Warnf("validation failed: %v", err)
-		return err
-	}
-
-	err := r.DB.WithContext(ctx).Create(profile).Error
+	entityProfile := mapper.FromDomainProfile(profile)
+	err := r.DB.WithContext(ctx).Create(entityProfile).Error
 	if err != nil {
 		utils.Logger.Errorf("%s: userID=%d, error=%v", constants.ErrMsgRegisterProfile, profile.UserID, err)
 		return err
 	}
 
-	utils.Logger.Infof("%s: ID=%d, userID=%d", constants.MsgProfileCreatedSuccessfully, profile.ID, profile.UserID)
+	profile.ID = entityProfile.ID
+
+	utils.Logger.Infof("%s: userID=%d", constants.MsgProfileCreatedSuccessfully, profile.UserID)
 	return nil
 }
 
 func (r *ProfileRepo) FindByUser(ctx context.Context, userID uint) ([]domain.Profile, error) {
-	var profiles []domain.Profile
-	err := r.DB.WithContext(ctx).Where("user_id = ?", userID).Find(&profiles).Error
+	var entityProfiles []entity.Profile
+	err := r.DB.WithContext(ctx).Preload("WatchHistory").Where("user_id = ?", userID).Find(&entityProfiles).Error
 	if err != nil {
 		utils.Logger.Errorf("%s: userID=%d, error=%v", constants.ErrMsgGetProfiles, userID, err)
 		return nil, err
 	}
 
+	domainProfiles := make([]domain.Profile, len(entityProfiles))
+	for i, ep := range entityProfiles {
+		domainProfiles[i] = *mapper.ToDomainProfile(&ep)
+	}
+
 	utils.Logger.Infof("%s: userID=%d", constants.MsgProfilesRetrievedSuccessfully, userID)
-	return profiles, nil
+	return domainProfiles, nil
 }
 
 func (r *ProfileRepo) DeleteByID(ctx context.Context, profileID, userID uint) error {
-	result := r.DB.WithContext(ctx).Where("id = ? AND user_id = ?", profileID, userID).Delete(&domain.Profile{})
+	result := r.DB.WithContext(ctx).Where("id = ? AND user_id = ?", profileID, userID).Delete(&entity.Profile{})
 	if result.Error != nil {
 		utils.Logger.Errorf("%s: profileID=%d, userID=%d, error=%v", constants.ErrMsgDeleteProfile, profileID, userID, result.Error)
 		return result.Error
@@ -65,12 +70,8 @@ func (r *ProfileRepo) DeleteByID(ctx context.Context, profileID, userID uint) er
 }
 
 func (r *ProfileRepo) Update(ctx context.Context, profile *domain.Profile) error {
-	if err := profile.Validate(); err != nil {
-		utils.Logger.Warnf("validation failed: %v", err)
-		return err
-	}
-
-	result := r.DB.WithContext(ctx).Save(profile)
+	entityProfile := mapper.FromDomainProfile(profile)
+	result := r.DB.WithContext(ctx).Save(entityProfile)
 	if result.Error != nil {
 		utils.Logger.Errorf("%s: profileID=%d, error=%v", constants.ErrMsgUpdateProfile, profile.ID, result.Error)
 		return result.Error
@@ -86,8 +87,11 @@ func (r *ProfileRepo) Update(ctx context.Context, profile *domain.Profile) error
 }
 
 func (r *ProfileRepo) FindByIDAndUser(ctx context.Context, profileID, userID uint) (*domain.Profile, error) {
-	var profile domain.Profile
-	err := r.DB.WithContext(ctx).Where("id = ? AND user_id = ?", profileID, userID).First(&profile).Error
+	var entityProfile entity.Profile
+	err := r.DB.WithContext(ctx).Preload("WatchHistory").
+		Where("id = ? AND user_id = ?", profileID, userID).
+		First(&entityProfile).Error
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			utils.Logger.Warnf("%s: profileID=%d, userID=%d", constants.ErrMsgProfileNotFound, profileID, userID)
@@ -97,6 +101,7 @@ func (r *ProfileRepo) FindByIDAndUser(ctx context.Context, profileID, userID uin
 		return nil, err
 	}
 
+	domainProfile := mapper.ToDomainProfile(&entityProfile)
 	utils.Logger.Infof("%s: profileID=%d, userID=%d", constants.MsgProfileRetrievedSuccessfully, profileID, userID)
-	return &profile, nil
+	return domainProfile, nil
 }

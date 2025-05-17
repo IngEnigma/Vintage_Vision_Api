@@ -6,6 +6,8 @@ import (
 	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
+	"vintage-vision-api/repository/entity"
+	"vintage-vision-api/repository/mapper"
 
 	"gorm.io/gorm"
 )
@@ -19,18 +21,27 @@ func NewUserRepo(db *gorm.DB) domain.UserRepository {
 }
 
 func (r *UserRepo) Create(ctx context.Context, user *domain.User) error {
-	err := r.DB.WithContext(ctx).Create(user).Error
+	entityUser := mapper.FromDomainUser(user)
+
+	err := r.DB.WithContext(ctx).Create(entityUser).Error
 	if err != nil {
 		utils.Logger.Errorf("%s (%s): %v", constants.ErrMsgCreateUser, user.Email, err)
-	} else {
-		utils.Logger.Infof("%s: %s", constants.MsgUserCreatedSuccessfully, user.Email)
+		return err
 	}
-	return err
+
+	user.ID = entityUser.ID
+
+	utils.Logger.Infof("%s: %s", constants.MsgUserCreatedSuccessfully, user.Email)
+	return nil
 }
 
 func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	var user domain.User
-	err := r.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
+	var entityUser entity.User
+	err := r.DB.WithContext(ctx).
+		Preload("Profiles.WatchHistory").
+		Where("email = ?", email).
+		First(&entityUser).Error
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			utils.Logger.Warnf("%s: %s", constants.ErrMsgUserNotFoundByEmail, email)
@@ -40,6 +51,8 @@ func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User,
 		return nil, err
 	}
 
+	domainUser := mapper.ToDomainUser(&entityUser)
+
 	utils.Logger.Infof("%s: %s", constants.MsgUserFoundByEmail, email)
-	return &user, nil
+	return domainUser, nil
 }

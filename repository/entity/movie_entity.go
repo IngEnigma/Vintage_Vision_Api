@@ -1,21 +1,23 @@
-package domain
+package entity
 
 import (
 	"errors"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type Movie struct {
-	ID          uint
-	Title       string
+	gorm.Model
+	Title       string `gorm:"not null;size:200"`
 	Description string
 	Year        int
 	Genre       string
 	ImageURL    string
-	StreamURL   string
+	StreamURL   string `gorm:"not null;size:500"`
 	Duration    int
 
-	WatchHistories []WatchHistory
+	WatchHistories []WatchHistory `gorm:"foreignKey:MovieID"`
 }
 
 func (m *Movie) Validate() error {

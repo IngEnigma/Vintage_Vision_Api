@@ -1,18 +1,10 @@
 package domain
 
-import (
-	"gorm.io/gorm"
-)
-
 type User struct {
-	gorm.Model
-	Email    string `gorm:"unique;not null;size:255"`
-	Password string `gorm:"not null"`
-	IsAdmin  bool   `gorm:"default:false"`
+	ID       uint
+	Email    string
+	Password string
+	IsAdmin  bool
 
-	Profiles []Profile `gorm:"foreignKey:UserID"`
-}
-
-func (u *User) IsAdminUser() bool {
-	return u.IsAdmin
+	Profiles []Profile
 }

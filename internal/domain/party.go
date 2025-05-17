@@ -3,14 +3,14 @@ package domain
 import "time"
 
 type Party struct {
-	ID        uint   `gorm:"primaryKey"`
-	HostID    uint   `gorm:"not null"`
-	MovieID   uint   `gorm:"not null"`
-	PartyCode string `gorm:"uniqueIndex"`
+	ID        uint
+	HostID    uint
+	MovieID   uint
+	PartyCode string
 	CreatedAt time.Time
 	ExpiresAt time.Time
 
-	Movie   Movie         `gorm:"foreignKey:MovieID"`
-	Host    User          `gorm:"foreignKey:HostID"`
-	Members []PartyMember `gorm:"foreignKey:PartyID"`
+	Movie   Movie
+	Host    User
+	Members []PartyMember
 }
