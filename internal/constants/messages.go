@@ -111,9 +111,11 @@ const (
 	ErrMsgInvalidID              = "id no válido"
 	ErrMsgInvalidRequest         = "datos inválidos"
 	ErrMsgInvalidYear            = "año no válido"
+	ErrMsgInvalidLoginData       = "datos de inicio de sesión inválidos"
 	ErrMsgUpdateMovieFields      = "campos inválidos para actualizar la película"
 	ErrMsgEmptyEmail             = "el email no puede estar vacío"
 	ErrMsgEmptyPassword          = "la contraseña no puede estar vacía"
+	ErrMsgInvalidRegisterData    = "datos de registro inválidos"
 	ErrMshEmptyProfileName       = "el nombre de perfil no puede estar vacío"
 	ErrMsgEmptyProfileId         = "el id del perfil no puede estar vacío"
 

@@ -11,14 +11,20 @@ import (
 )
 
 type UserUsecase struct {
-	Repo domain.UserRepository
+	Repo  domain.UserRepository
+	Token domain.TokenGenerator
 }
 
-func NewUserUsecase(r domain.UserRepository) *UserUsecase {
-	return &UserUsecase{Repo: r}
+func NewUserUsecase(r domain.UserRepository, t domain.TokenGenerator) *UserUsecase {
+	return &UserUsecase{Repo: r, Token: t}
 }
 
 func (u *UserUsecase) Register(ctx context.Context, req request.RegisterRequest) error {
+	if errs := utils.ValidateRegisterInput(req); len(errs) > 0 {
+		utils.Logger.Warnf("Errores de validación en registro: %+v", errs)
+		return errors.New(constants.ErrMsgInvalidRegisterData)
+	}
+
 	existingUser, _ := u.Repo.FindByEmail(ctx, req.Email)
 	if existingUser != nil {
 		utils.Logger.Warnf("%s: %s", constants.ErrMsgEmailAlreadyRegistered, req.Email)
@@ -46,6 +52,11 @@ func (u *UserUsecase) Register(ctx context.Context, req request.RegisterRequest)
 }
 
 func (u *UserUsecase) Login(ctx context.Context, req request.LoginRequest) (string, error) {
+	if errs := utils.ValidateLoginInput(req); len(errs) > 0 {
+		utils.Logger.Warnf("Errores de validación en login: %+v", errs)
+		return "", errors.New(constants.ErrMsgInvalidLoginData)
+	}
+
 	user, err := u.Repo.FindByEmail(ctx, req.Email)
 	if err != nil || user == nil {
 		utils.Logger.Warnf("%s: %s", constants.ErrMsgUserNotFound, req.Email)
@@ -57,7 +68,7 @@ func (u *UserUsecase) Login(ctx context.Context, req request.LoginRequest) (stri
 		return "", errors.New(constants.ErrMsgInvalidCredentials)
 	}
 
-	token, err := utils.GenerateJWT(user.ID, user.IsAdmin)
+	token, err := u.Token.Generate(user.ID, user.IsAdmin)
 	if err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgGeneratingToken, err)
 		return "", errors.New(constants.ErrMsgGeneratingToken)

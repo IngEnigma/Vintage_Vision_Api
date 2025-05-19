@@ -8,7 +8,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(userID uint, isAdmin bool) (string, error) {
+type JWTGenerator struct{}
+
+func (g *JWTGenerator) Generate(userID uint, isAdmin bool) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return "", errors.New("JWT_SECRET no configurado en variables de entorno")

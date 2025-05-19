@@ -35,7 +35,8 @@ func main() {
 	utils.Logger.Info(constants.MsgDBConnectionSuccess)
 
 	userRepo := repository.NewUserRepo(dbConn.DB)
-	userUC := usecase.NewUserUsecase(userRepo)
+	jwtGen := &utils.JWTGenerator{}
+	userUC := usecase.NewUserUsecase(userRepo, jwtGen)
 	authHandler := handler.NewAuthHandler(userUC)
 
 	profileRepo := repository.NewProfileRepo(dbConn.DB)
