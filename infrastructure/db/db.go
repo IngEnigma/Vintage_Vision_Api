@@ -5,8 +5,8 @@ import (
 
 	"vintage-vision-api/infrastructure/config"
 	"vintage-vision-api/internal/constants"
-	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/utils"
+	"vintage-vision-api/repository/entity"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,12 +24,12 @@ func NewDBConnection(dsn string) (*DBConnection, error) {
 	}
 
 	err = db.AutoMigrate(
-		&domain.User{},
-		&domain.Profile{},
-		&domain.Movie{},
-		&domain.WatchHistory{},
-		&domain.Party{},
-		&domain.PartyMember{},
+		&entity.User{},
+		&entity.Profile{},
+		&entity.Movie{},
+		&entity.WatchHistory{},
+		&entity.Party{},
+		&entity.PartyMember{},
 	)
 	if err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgDBMigration, err)
