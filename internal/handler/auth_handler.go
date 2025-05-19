@@ -16,10 +16,21 @@ type AuthHandler struct {
 	Usecase *usecase.UserUsecase
 }
 
-func NewAuthHandler(u *usecase.UserUsecase) *AuthHandler {
-	return &AuthHandler{Usecase: u}
+// NewAuthHandler crea una nueva instancia de AuthHandler
+func NewAuthHandler(userUsecase *usecase.UserUsecase) *AuthHandler {
+	return &AuthHandler{
+		Usecase: userUsecase,
+	}
 }
 
+// @Summary Registrar un nuevo usuario
+// @Description Crea una nueva cuenta de usuario en el sistema
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body request.RegisterRequest true "Datos de registro"
+// @Success 201 {object} response.SuccessResponse "Usuario registrado exitosamente"
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -38,6 +49,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": constants.MsgUserRegisteredSuccessfully})
 }
 
+// Login godoc
+// @Summary Iniciar sesión
+// @Description Autentica un usuario y devuelve un token JWT
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body request.LoginRequest true "Credenciales de acceso"
+// @Success 200 {object} response.AuthResponse "Token JWT generado"
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	ctx := c.Request.Context()
 

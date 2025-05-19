@@ -11,7 +11,19 @@ import (
 	"vintage-vision-api/repository"
 
 	"github.com/joho/godotenv"
+
+	_ "vintage-vision-api/docs"
 )
+
+// Package main contiene la documentación principal de la API.
+// @title Vintage Vision API
+// @version 1.0
+// @description API para la plataforma de streaming de películas clásicas.
+// @host localhost:8080
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	if err := godotenv.Load(); err != nil {
