@@ -29,6 +29,12 @@ func (u *MovieUsecase) GetAll(ctx context.Context, limit, offset int) ([]domain.
 }
 
 func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieRequest) (*domain.Movie, error) {
+	validationErrors := utils.ValidateCreateMovieInput(req)
+	if len(validationErrors) > 0 {
+		utils.Logger.Warnf("Errores de validación al crear película: %+v", validationErrors)
+		return nil, errors.New(constants.ErrMsgInvalidInput)
+	}
+
 	movie := domain.Movie{
 		Title:       req.Title,
 		Description: req.Description,
@@ -49,29 +55,13 @@ func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieReques
 }
 
 func (u *MovieUsecase) Update(ctx context.Context, id uint, req request.UpdateMovieRequest) (*domain.Movie, error) {
-	updates := map[string]interface{}{}
+	validationErrors := utils.ValidateUpdateMovieInput(req)
+	if len(validationErrors) > 0 {
+		utils.Logger.Warnf("Errores de validación al actualizar película %d: %+v", id, validationErrors)
+		return nil, errors.New(constants.ErrMsgInvalidInput)
+	}
 
-	if req.Title != nil {
-		updates["title"] = *req.Title
-	}
-	if req.Description != nil {
-		updates["description"] = *req.Description
-	}
-	if req.Year != nil {
-		updates["year"] = *req.Year
-	}
-	if req.ImageURL != nil {
-		updates["image_url"] = *req.ImageURL
-	}
-	if req.StreamURL != nil {
-		updates["stream_url"] = *req.StreamURL
-	}
-	if req.Genre != nil {
-		updates["genre"] = *req.Genre
-	}
-	if req.Duration != nil {
-		updates["duration"] = *req.Duration
-	}
+	updates := utils.BuildMovieUpdateMap(req)
 
 	if len(updates) == 0 {
 		utils.Logger.Warnf("%s: %d", constants.ErrMsgUpdateMovieFields, id)
@@ -94,10 +84,28 @@ func (u *MovieUsecase) Update(ctx context.Context, id uint, req request.UpdateMo
 }
 
 func (u *MovieUsecase) Delete(ctx context.Context, id uint) error {
+	movie, err := u.Repo.GetByID(ctx, id)
+	if err != nil || movie == nil {
+		utils.Logger.Warnf("%s: ID %d", constants.ErrMsgMovieNotFound, id)
+		return errors.New(constants.ErrMsgMovieNotFound)
+	}
+
 	if err := u.Repo.Delete(ctx, id); err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgDeleteMovie, err)
 		return err
 	}
+
 	utils.Logger.Infof("%s con ID %d", constants.MsgMovieDeletedSuccessfully, id)
 	return nil
+}
+
+func (u *MovieUsecase) GetByID(ctx context.Context, id uint) (*domain.Movie, error) {
+	movie, err := u.Repo.GetByID(ctx, id)
+	if err != nil || movie == nil {
+		utils.Logger.Warnf("%s: ID %d", constants.ErrMsgMovieNotFound, id)
+		return nil, errors.New(constants.ErrMsgMovieNotFound)
+	}
+
+	utils.Logger.Infof("%s con ID %d", constants.MsgMovieRetrievedSuccessfully, id)
+	return movie, nil
 }

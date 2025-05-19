@@ -25,6 +25,13 @@ func IsValidURL(str string) bool {
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
+func IsValidProfileName(name string) bool {
+	if len(name) == 0 || len(name) > 10 {
+		return false
+	}
+	return true
+}
+
 func ValidateRegisterInput(req request.RegisterRequest) map[string]string {
 	errors := map[string]string{}
 
@@ -49,4 +56,88 @@ func ValidateLoginInput(req request.LoginRequest) map[string]string {
 	}
 
 	return errors
+}
+
+func ValidateCreateMovieInput(req request.CreateMovieRequest) map[string]string {
+	errors := map[string]string{}
+
+	if !IsNonEmpty(req.Title) {
+		errors["title"] = "El título es obligatorio"
+	}
+	if !IsNonEmpty(req.Description) {
+		errors["description"] = "La descripción es obligatoria"
+	}
+	if req.Year < 1888 || req.Year > 2000 {
+		errors["year"] = "El año debe ser válido"
+	}
+	if !IsValidURL(req.ImageURL) {
+		errors["image_url"] = "La URL de la imagen no es válida"
+	}
+	if !IsValidURL(req.StreamURL) {
+		errors["stream_url"] = "La URL de streaming no es válida"
+	}
+	if !IsNonEmpty(req.Genre) {
+		errors["genre"] = "El género es obligatorio"
+	}
+	if req.Duration <= 0 {
+		errors["duration"] = "La duración debe ser mayor a 0 minutos"
+	}
+
+	return errors
+}
+
+func ValidateUpdateMovieInput(req request.UpdateMovieRequest) map[string]string {
+	errors := map[string]string{}
+
+	if req.Title != nil && !IsNonEmpty(*req.Title) {
+		errors["title"] = "El título no puede estar vacío"
+	}
+	if req.Description != nil && !IsNonEmpty(*req.Description) {
+		errors["description"] = "La descripción no puede estar vacía"
+	}
+	if req.Year != nil && (*req.Year < 1888 || *req.Year > 2100) {
+		errors["year"] = "El año debe ser válido"
+	}
+	if req.ImageURL != nil && !IsValidURL(*req.ImageURL) {
+		errors["image_url"] = "La URL de la imagen no es válida"
+	}
+	if req.StreamURL != nil && !IsValidURL(*req.StreamURL) {
+		errors["stream_url"] = "La URL de streaming no es válida"
+	}
+	if req.Genre != nil && !IsNonEmpty(*req.Genre) {
+		errors["genre"] = "El género no puede estar vacío"
+	}
+	if req.Duration != nil && *req.Duration <= 0 {
+		errors["duration"] = "La duración debe ser mayor a 0 minutos"
+	}
+
+	return errors
+}
+
+func BuildMovieUpdateMap(req request.UpdateMovieRequest) map[string]interface{} {
+	updates := map[string]interface{}{}
+
+	if req.Title != nil {
+		updates["title"] = *req.Title
+	}
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
+	if req.Year != nil {
+		updates["year"] = *req.Year
+	}
+	if req.ImageURL != nil {
+		updates["image_url"] = *req.ImageURL
+	}
+	if req.StreamURL != nil {
+		updates["stream_url"] = *req.StreamURL
+	}
+	if req.Genre != nil {
+		updates["genre"] = *req.Genre
+	}
+	if req.Duration != nil {
+		updates["duration"] = *req.Duration
+	}
+
+	return updates
 }

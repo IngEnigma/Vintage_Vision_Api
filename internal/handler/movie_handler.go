@@ -18,10 +18,18 @@ type MovieHandler struct {
 	Usecase *usecase.MovieUsecase
 }
 
+// NewMovieHandler crea un nuevo handler de peliculas
 func NewMovieHandler(u *usecase.MovieUsecase) *MovieHandler {
 	return &MovieHandler{Usecase: u}
 }
 
+// GetAll godoc
+// @Summary Obtener todas las películas
+// @Description Devuelve una lista de películas disponibles
+// @Tags Movies
+// @Produce json
+// @Success 200 {array} response.MovieResponse
+// @Router /movies [get]
 func (h *MovieHandler) GetAll(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -49,6 +57,46 @@ func (h *MovieHandler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// GetByID godoc
+// @Summary Obtener una película por ID
+// @Description Devuelve la información de una película específica
+// @Tags Movies
+// @Produce json
+// @Param id path int true "ID de la película"
+// @Success 200 {object} response.MovieResponse
+// @Router /movies/{id} [get]
+func (h *MovieHandler) GetByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidID, err)
+		return
+	}
+
+	movie, err := h.Usecase.GetByID(c.Request.Context(), uint(id))
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgGetMovie, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, movie)
+}
+
+// Create godoc
+// @Summary Crear una nueva película
+// @Description Sube una imagen y un video a Cloudinary y crea una nueva película
+// @Tags Movies
+// @Accept multipart/form-data
+// @Produce json
+// @Param title formData string true "Título"
+// @Param description formData string true "Descripción"
+// @Param year formData int true "Año"
+// @Param genre formData string true "Género"
+// @Param duration formData int true "Duración (minutos)"
+// @Param image formData file true "Imagen de la película"
+// @Param video formData file true "Video de la película"
+// @Success 201 {object} map[string]string
+// @Router /movies [post]
 func (h *MovieHandler) Create(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -121,6 +169,22 @@ func (h *MovieHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": constants.MsgMovieCreatedSuccessfully})
 }
 
+// Update godoc
+// @Summary Actualizar una película
+// @Description Actualiza los campos enviados para una película específica
+// @Tags Movies
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "ID de la película"
+// @Param title formData string false "Título"
+// @Param description formData string false "Descripción"
+// @Param year formData int false "Año"
+// @Param genre formData string false "Género"
+// @Param duration formData int false "Duración (minutos)"
+// @Param image formData file false "Nueva imagen de la película"
+// @Param video formData file false "Nuevo video de la película"
+// @Success 200 {object} map[string]string
+// @Router /movies/{id} [put]
 func (h *MovieHandler) Update(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -198,6 +262,14 @@ func (h *MovieHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": constants.MsgMovieUpdatedSuccessfully})
 }
 
+// Delete godoc
+// @Summary Eliminar una película
+// @Description Elimina una película por ID
+// @Tags Movies
+// @Produce json
+// @Param id path int true "ID de la película"
+// @Success 200 {object} map[string]string
+// @Router /movies/{id} [delete]
 func (h *MovieHandler) Delete(c *gin.Context) {
 	ctx := c.Request.Context()
 

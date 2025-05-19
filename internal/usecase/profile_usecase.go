@@ -19,7 +19,7 @@ func NewProfileUsecase(r domain.ProfileRepository) *ProfileUsecase {
 }
 
 func (u *ProfileUsecase) Create(ctx context.Context, userID uint, req request.CreateProfileRequest) error {
-	if len(req.Name) == 0 || len(req.Name) > 10 {
+	if !utils.IsValidProfileName(req.Name) {
 		return errors.New(constants.ErrMsgInvalidProfileName)
 	}
 
@@ -106,7 +106,7 @@ func (u *ProfileUsecase) Update(ctx context.Context, profileID, userID uint, req
 	}
 
 	if req.Name != nil {
-		if len(*req.Name) == 0 || len(*req.Name) > 10 {
+		if !utils.IsValidProfileName(*req.Name) {
 			return errors.New(constants.ErrMsgInvalidProfileName)
 		}
 

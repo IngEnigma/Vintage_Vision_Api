@@ -101,6 +101,8 @@ const (
 	ErrMsgUpdateMovieFieldsDB = "error al actualizar campos de la película"
 	ErrMsgGetMovieAll         = "error al obtener todas las películas"
 	ErrMsgDeleteMovieByID     = "error al eliminar la película con ID"
+	ErrMsgMovieNotFound       = "película no encontrada"
+	ErrMsgGetMovie            = "error al obtener la película"
 
 	// ==================================
 	// Errores de Validación
@@ -122,6 +124,7 @@ const (
 	ErrMsgInvalidAvatarURL       = "la URL del avatar no es válida"
 	ErrMsgMaxProfilesReached     = "ya tienes el número máximo de perfiles (4)"
 	ErrMsgProfileNameTaken       = "ya existe un perfil con ese nombre"
+	ErrMsgInvalidInput           = "datos de entrada inválidos"
 
 	// ==================================
 	// Errores Técnicos/Generales
