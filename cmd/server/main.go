@@ -24,6 +24,9 @@ import (
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
+// @schemes http
+// @accept json
+// @produce json
 
 func main() {
 	if err := godotenv.Load(); err != nil {
