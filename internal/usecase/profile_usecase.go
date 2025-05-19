@@ -19,6 +19,29 @@ func NewProfileUsecase(r domain.ProfileRepository) *ProfileUsecase {
 }
 
 func (u *ProfileUsecase) Create(ctx context.Context, userID uint, req request.CreateProfileRequest) error {
+	if len(req.Name) == 0 || len(req.Name) > 10 {
+		return errors.New(constants.ErrMsgInvalidProfileName)
+	}
+
+	if !utils.IsValidURL(req.AvatarUrl) {
+		return errors.New(constants.ErrMsgInvalidAvatarURL)
+	}
+
+	existingProfiles, err := u.Repo.FindByUser(ctx, userID)
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetProfiles, err)
+		return err
+	}
+	if len(existingProfiles) >= 4 {
+		return errors.New(constants.ErrMsgMaxProfilesReached)
+	}
+
+	for _, p := range existingProfiles {
+		if p.Name == req.Name {
+			return errors.New(constants.ErrMsgProfileNameTaken)
+		}
+	}
+
 	profile := &domain.Profile{
 		Name:      req.Name,
 		AvatarURL: req.AvatarUrl,
@@ -46,6 +69,16 @@ func (u *ProfileUsecase) GetAll(ctx context.Context, userID uint) ([]domain.Prof
 }
 
 func (u *ProfileUsecase) Delete(ctx context.Context, profileID, userID uint) error {
+	profile, err := u.Repo.FindByIDAndUser(ctx, profileID, userID)
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetProfile, err)
+		return err
+	}
+	if profile == nil {
+		utils.Logger.Warnf("%s (userID: %d, profileID: %d)", constants.ErrMsgProfileNotFound, userID, profileID)
+		return errors.New(constants.ErrMsgProfileNotFound)
+	}
+
 	if err := u.Repo.DeleteByID(ctx, profileID, userID); err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgDeleteProfile, err)
 		return err
@@ -66,10 +99,30 @@ func (u *ProfileUsecase) Update(ctx context.Context, profileID, userID uint, req
 		return errors.New(constants.ErrMsgProfileNotFound)
 	}
 
+	existingProfiles, err := u.Repo.FindByUser(ctx, userID)
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetProfiles, err)
+		return err
+	}
+
 	if req.Name != nil {
+		if len(*req.Name) == 0 || len(*req.Name) > 10 {
+			return errors.New(constants.ErrMsgInvalidProfileName)
+		}
+
+		for _, p := range existingProfiles {
+			if p.Name == *req.Name && p.ID != profileID {
+				return errors.New(constants.ErrMsgProfileNameTaken)
+			}
+		}
+
 		profile.Name = *req.Name
 	}
+
 	if req.AvatarURL != nil {
+		if !utils.IsValidURL(*req.AvatarURL) {
+			return errors.New(constants.ErrMsgInvalidAvatarURL)
+		}
 		profile.AvatarURL = *req.AvatarURL
 	}
 

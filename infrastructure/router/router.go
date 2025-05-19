@@ -1,9 +1,11 @@
 package router
 
 import (
+	"time"
 	"vintage-vision-api/internal/handler"
 	"vintage-vision-api/internal/middleware"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -13,22 +15,29 @@ import (
 func SetupRouter(authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler) *gin.Engine {
 	r := gin.Default()
 
-	// Configuración de Swagger UI
+	// Configuración CORS más segura para producción (ajusta los orígenes según necesites)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // En producción cambia a tus dominios específicos
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	// Swagger documentation
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Grupo base para todas las rutas API
+	// API routes grouping
 	api := r.Group("/api")
 	{
-		// Rutas públicas (sin autenticación)
-		publicRoutes(api, authHandler)
+		publicRoutes(api, authHandler) // Public routes (no auth required)
 
-		// Rutas privadas (requieren autenticación)
-		private := api.Group("/")
+		private := api.Group("/") // Private routes (auth required)
 		private.Use(middleware.AuthMiddleware())
 		privateRoutes(private, profileHandler, movieHandler)
 
-		// Rutas de administrador (requieren autenticación y rol admin)
-		admin := api.Group("/admin")
+		admin := api.Group("/admin") // Admin routes (auth + admin role required)
 		admin.Use(middleware.AuthMiddleware(), middleware.AdminOnly())
 		adminRoutes(admin, movieHandler)
 	}

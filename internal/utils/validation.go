@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/url"
 	"regexp"
 	"unicode/utf8"
 	"vintage-vision-api/internal/model/request"
@@ -17,6 +18,11 @@ func IsValidPassword(password string) bool {
 
 func IsNonEmpty(s string) bool {
 	return len(s) > 0 && len(regexp.MustCompile(`\S`).FindString(s)) > 0
+}
+
+func IsValidURL(str string) bool {
+	u, err := url.ParseRequestURI(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
 func ValidateRegisterInput(req request.RegisterRequest) map[string]string {

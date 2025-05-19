@@ -118,6 +118,10 @@ const (
 	ErrMsgInvalidRegisterData    = "datos de registro inválidos"
 	ErrMshEmptyProfileName       = "el nombre de perfil no puede estar vacío"
 	ErrMsgEmptyProfileId         = "el id del perfil no puede estar vacío"
+	ErrMsgInvalidProfileName     = "el nombre del perfil debe tener entre 1 y 10 caracteres"
+	ErrMsgInvalidAvatarURL       = "la URL del avatar no es válida"
+	ErrMsgMaxProfilesReached     = "ya tienes el número máximo de perfiles (4)"
+	ErrMsgProfileNameTaken       = "ya existe un perfil con ese nombre"
 
 	// ==================================
 	// Errores Técnicos/Generales
