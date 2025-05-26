@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
                 "consumes": [
@@ -45,11 +45,250 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.AuthResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales inválidas",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
                     }
                 }
             }
         },
-        "/auth/register": {
+        "/api/profiles": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Obtiene todos los perfiles del usuario autenticado",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Obtener todos los perfiles",
+                "responses": {
+                    "200": {
+                        "description": "Lista de perfiles",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.ProfileResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Crea un nuevo perfil para el usuario autenticado",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Crear un nuevo perfil",
+                "parameters": [
+                    {
+                        "description": "Datos del perfil a crear",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Perfil creado exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/profiles/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Actualiza un perfil específico del usuario autenticado",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Actualizar un perfil",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del perfil a actualizar",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos del perfil a actualizar",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil actualizado exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida o ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Perfil no encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Elimina un perfil específico del usuario autenticado",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Eliminar un perfil",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del perfil a eliminar",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil eliminado exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Perfil no encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register": {
             "post": {
                 "description": "Crea una nueva cuenta de usuario en el sistema",
                 "consumes": [
@@ -79,12 +318,47 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.SuccessResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Usuario ya existe",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "request.CreateProfileRequest": {
+            "type": "object",
+            "required": [
+                "avatar_url",
+                "name"
+            ],
+            "properties": {
+                "avatar_url": {
+                    "description": "URL válida del avatar del perfil\nrequired: true\nexample: \"https://ejemplo.com/avatar.jpg\"\nformat: uri",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Nombre del perfil (entre 1 y 10 caracteres)\nrequired: true\nexample: \"MiPerfil\"\nminLength: 1\nmaxLength: 10",
+                    "type": "string"
+                }
+            }
+        },
         "request.LoginRequest": {
             "type": "object",
             "required": [
@@ -93,11 +367,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "description": "Email del usuario\nrequired: true\nexample: usuario@ejemplo.com",
+                    "description": "Email del usuario registrado\nrequired: true\nexample: usuario@ejemplo.com\nformat: email",
                     "type": "string"
                 },
                 "password": {
-                    "description": "Contraseña del usuario\nrequired: true\nexample: Password123!",
+                    "description": "Contraseña del usuario\nrequired: true\nexample: Password123!\nminLength: 8",
                     "type": "string"
                 }
             }
@@ -110,13 +384,28 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "description": "Email del usuario (debe ser válido)\nrequired: true\nexample: usuario@ejemplo.com",
+                    "description": "Email del usuario (debe ser unico y válido)\nrequired: true\nexample: usuario@ejemplo.com\nformat: email",
                     "type": "string"
                 },
                 "password": {
-                    "description": "Contraseña (mínimo 8 caracteres)\nrequired: true\nexample: Password123!",
+                    "description": "Contraseña (mínimo 8 caracteres)\nrequired: true\nexample: Password123!\nminLength: 8",
                     "type": "string",
                     "minLength": 8
+                }
+            }
+        },
+        "request.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "description": "Nueva URL válida del avatar (opcional)\nexample: \"https://ejemplo.com/nuevo-avatar.jpg\"\nformat: uri",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Nuevo nombre del perfil (entre 1 y 10 caracteres, opcional)\nexample: \"NuevoNombre\"\nminLength: 1\nmaxLength: 10",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
                 }
             }
         },
@@ -124,7 +413,41 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
-                    "description": "Token JWT para autenticación\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                    "description": "Token JWT para autenticación en solicitudes posteriores\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Detalle técnico del error (opcional)\nexample: \"Invalid email format\"",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Mensaje descriptivo del error\nexample: \"Solicitud inválida\"",
+                    "type": "string"
+                },
+                "statusCode": {
+                    "description": "Código de estado HTTP\nexample: 400",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "description": "URL completa del avatar del perfil\nexample: \"https://ejemplo.com/avatar.jpg\"\nformat: uri",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID único del perfil\nexample: 1",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Nombre del perfil (máximo 10 caracteres)\nexample: \"MiPerfil\"\nmaxLength: 10",
                     "type": "string"
                 }
             }
@@ -132,9 +455,16 @@ const docTemplate = `{
         "response.SuccessResponse": {
             "type": "object",
             "properties": {
+                "data": {
+                    "description": "Datos adicionales de la operación (opcional)"
+                },
                 "message": {
-                    "description": "Mensaje de éxito\nexample: Operación realizada con éxito",
+                    "description": "Mensaje descriptivo del resultado\nexample: Operación realizada con éxito",
                     "type": "string"
+                },
+                "success": {
+                    "description": "Indica si la operación fue exitosa\nexample: true",
+                    "type": "boolean"
                 }
             }
         }

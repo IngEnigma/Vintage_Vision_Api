@@ -1,11 +1,19 @@
 package response
 
 // ProfileResponse representa los datos de un perfil devuelto en la respuesta
+// swagger:model ProfileResponse
 type ProfileResponse struct {
-	// ID del perfil
-	ID uint `json:"id" example:"1"`
-	// Nombre del perfil
-	Name string `json:"name" example:"John"`
-	// URL del avatar
-	AvatarUrl string `json:"avatar_url" example:"https://example.com/avatar.png"`
+	// ID único del perfil
+	// example: 1
+	ID uint `json:"id"`
+
+	// Nombre del perfil (máximo 10 caracteres)
+	// example: "MiPerfil"
+	// maxLength: 10
+	Name string `json:"name"`
+
+	// URL completa del avatar del perfil
+	// example: "https://ejemplo.com/avatar.jpg"
+	// format: uri
+	AvatarUrl string `json:"avatar_url"`
 }

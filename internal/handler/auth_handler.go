@@ -16,13 +16,13 @@ type AuthHandler struct {
 	Usecase *usecase.UserUsecase
 }
 
-// NewAuthHandler crea una nueva instancia de AuthHandler
 func NewAuthHandler(userUsecase *usecase.UserUsecase) *AuthHandler {
 	return &AuthHandler{
 		Usecase: userUsecase,
 	}
 }
 
+// Register godoc
 // @Summary Registrar un nuevo usuario
 // @Description Crea una nueva cuenta de usuario en el sistema
 // @Tags Auth
@@ -30,7 +30,10 @@ func NewAuthHandler(userUsecase *usecase.UserUsecase) *AuthHandler {
 // @Produce json
 // @Param request body request.RegisterRequest true "Datos de registro"
 // @Success 201 {object} response.SuccessResponse "Usuario registrado exitosamente"
-// @Router /auth/register [post]
+// @Failure 400 {object} response.ErrorResponse "Solicitud inválida"
+// @Failure 409 {object} response.ErrorResponse "Usuario ya existe"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
+// @Router /api/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -57,7 +60,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Produce json
 // @Param request body request.LoginRequest true "Credenciales de acceso"
 // @Success 200 {object} response.AuthResponse "Token JWT generado"
-// @Router /auth/login [post]
+// @Failure 400 {object} response.ErrorResponse "Solicitud inválida"
+// @Failure 401 {object} response.ErrorResponse "Credenciales inválidas"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
+// @Router /api/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	ctx := c.Request.Context()
 

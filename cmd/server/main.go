@@ -27,7 +27,6 @@ import (
 // @schemes http
 // @accept json
 // @produce json
-
 func main() {
 	if err := godotenv.Load(); err != nil {
 		utils.Logger.Warn(constants.ErrMsgMissingEnvVar)

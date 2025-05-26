@@ -1,18 +1,41 @@
 basePath: /api
 definitions:
+  request.CreateProfileRequest:
+    properties:
+      avatar_url:
+        description: |-
+          URL válida del avatar del perfil
+          required: true
+          example: "https://ejemplo.com/avatar.jpg"
+          format: uri
+        type: string
+      name:
+        description: |-
+          Nombre del perfil (entre 1 y 10 caracteres)
+          required: true
+          example: "MiPerfil"
+          minLength: 1
+          maxLength: 10
+        type: string
+    required:
+    - avatar_url
+    - name
+    type: object
   request.LoginRequest:
     properties:
       email:
         description: |-
-          Email del usuario
+          Email del usuario registrado
           required: true
           example: usuario@ejemplo.com
+          format: email
         type: string
       password:
         description: |-
           Contraseña del usuario
           required: true
           example: Password123!
+          minLength: 8
         type: string
     required:
     - email
@@ -22,36 +45,101 @@ definitions:
     properties:
       email:
         description: |-
-          Email del usuario (debe ser válido)
+          Email del usuario (debe ser unico y válido)
           required: true
           example: usuario@ejemplo.com
+          format: email
         type: string
       password:
         description: |-
           Contraseña (mínimo 8 caracteres)
           required: true
           example: Password123!
+          minLength: 8
         minLength: 8
         type: string
     required:
     - email
     - password
     type: object
+  request.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        description: |-
+          Nueva URL válida del avatar (opcional)
+          example: "https://ejemplo.com/nuevo-avatar.jpg"
+          format: uri
+        type: string
+      name:
+        description: |-
+          Nuevo nombre del perfil (entre 1 y 10 caracteres, opcional)
+          example: "NuevoNombre"
+          minLength: 1
+          maxLength: 10
+        maxLength: 10
+        minLength: 1
+        type: string
+    type: object
   response.AuthResponse:
     properties:
       token:
         description: |-
-          Token JWT para autenticación
+          Token JWT para autenticación en solicitudes posteriores
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        description: |-
+          Detalle técnico del error (opcional)
+          example: "Invalid email format"
+        type: string
+      message:
+        description: |-
+          Mensaje descriptivo del error
+          example: "Solicitud inválida"
+        type: string
+      statusCode:
+        description: |-
+          Código de estado HTTP
+          example: 400
+        type: integer
+    type: object
+  response.ProfileResponse:
+    properties:
+      avatar_url:
+        description: |-
+          URL completa del avatar del perfil
+          example: "https://ejemplo.com/avatar.jpg"
+          format: uri
+        type: string
+      id:
+        description: |-
+          ID único del perfil
+          example: 1
+        type: integer
+      name:
+        description: |-
+          Nombre del perfil (máximo 10 caracteres)
+          example: "MiPerfil"
+          maxLength: 10
         type: string
     type: object
   response.SuccessResponse:
     properties:
+      data:
+        description: Datos adicionales de la operación (opcional)
       message:
         description: |-
-          Mensaje de éxito
+          Mensaje descriptivo del resultado
           example: Operación realizada con éxito
         type: string
+      success:
+        description: |-
+          Indica si la operación fue exitosa
+          example: true
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -60,7 +148,7 @@ info:
   title: Vintage Vision API
   version: "1.0"
 paths:
-  /auth/login:
+  /api/login:
     post:
       consumes:
       - application/json
@@ -79,10 +167,163 @@ paths:
           description: Token JWT generado
           schema:
             $ref: '#/definitions/response.AuthResponse'
+        "400":
+          description: Solicitud inválida
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Credenciales inválidas
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Iniciar sesión
       tags:
       - Auth
-  /auth/register:
+  /api/profiles:
+    get:
+      description: Obtiene todos los perfiles del usuario autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de perfiles
+          schema:
+            items:
+              $ref: '#/definitions/response.ProfileResponse'
+            type: array
+        "401":
+          description: No autorizado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obtener todos los perfiles
+      tags:
+      - Profiles
+    post:
+      consumes:
+      - application/json
+      description: Crea un nuevo perfil para el usuario autenticado
+      parameters:
+      - description: Datos del perfil a crear
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Perfil creado exitosamente
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Solicitud inválida
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: No autorizado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Crear un nuevo perfil
+      tags:
+      - Profiles
+  /api/profiles/{id}:
+    delete:
+      description: Elimina un perfil específico del usuario autenticado
+      parameters:
+      - description: ID del perfil a eliminar
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perfil eliminado exitosamente
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: No autorizado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Perfil no encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Eliminar un perfil
+      tags:
+      - Profiles
+    put:
+      consumes:
+      - application/json
+      description: Actualiza un perfil específico del usuario autenticado
+      parameters:
+      - description: ID del perfil a actualizar
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos del perfil a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perfil actualizado exitosamente
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Solicitud inválida o ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: No autorizado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Perfil no encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Actualizar un perfil
+      tags:
+      - Profiles
+  /api/register:
     post:
       consumes:
       - application/json
@@ -101,6 +342,18 @@ paths:
           description: Usuario registrado exitosamente
           schema:
             $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Solicitud inválida
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Usuario ya existe
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
       summary: Registrar un nuevo usuario
       tags:
       - Auth

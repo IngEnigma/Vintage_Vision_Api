@@ -19,20 +19,22 @@ type ProfileHandler struct {
 	Usecase *usecase.ProfileUsecase
 }
 
-// NewProfileHandler crea una nueva instancia de ProfileHandler
 func NewProfileHandler(u *usecase.ProfileUsecase) *ProfileHandler {
 	return &ProfileHandler{Usecase: u}
 }
 
 // Create godoc
-// @Summary Crea un nuevo perfil
-// @Description Crea un perfil asociado al usuario autenticado
-// @Tags profiles
+// @Summary Crear un nuevo perfil
+// @Description Crea un nuevo perfil para el usuario autenticado
+// @Tags Profiles
+// @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Security BearerAuth
-// @Param profile body request.CreateProfileRequest true "Datos del perfil a crear"
-// @Success 201 {object} map[string]string "Perfil creado exitosamente"
+// @Param request body request.CreateProfileRequest true "Datos del perfil a crear"
+// @Success 201 {object} response.SuccessResponse "Perfil creado exitosamente"
+// @Failure 400 {object} response.ErrorResponse "Solicitud inválida"
+// @Failure 401 {object} response.ErrorResponse "No autorizado"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
 // @Router /api/profiles [post]
 func (h *ProfileHandler) Create(c *gin.Context) {
 	var req request.CreateProfileRequest
@@ -52,12 +54,14 @@ func (h *ProfileHandler) Create(c *gin.Context) {
 }
 
 // GetAll godoc
-// @Summary Lista todos los perfiles del usuario autenticado
-// @Description Obtiene todos los perfiles asociados a un usuario
-// @Tags profiles
-// @Produce json
+// @Summary Obtener todos los perfiles
+// @Description Obtiene todos los perfiles del usuario autenticado
+// @Tags Profiles
 // @Security BearerAuth
+// @Produce json
 // @Success 200 {array} response.ProfileResponse "Lista de perfiles"
+// @Failure 401 {object} response.ErrorResponse "No autorizado"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
 // @Router /api/profiles [get]
 func (h *ProfileHandler) GetAll(c *gin.Context) {
 	userID := c.GetUint("user_id")
@@ -82,12 +86,17 @@ func (h *ProfileHandler) GetAll(c *gin.Context) {
 }
 
 // Delete godoc
-// @Summary Elimina un perfil
-// @Description Elimina un perfil por ID asociado al usuario autenticado
-// @Tags profiles
+// @Summary Eliminar un perfil
+// @Description Elimina un perfil específico del usuario autenticado
+// @Tags Profiles
 // @Security BearerAuth
+// @Produce json
 // @Param id path int true "ID del perfil a eliminar"
-// @Success 200 {object} map[string]string "Perfil eliminado exitosamente"
+// @Success 200 {object} response.SuccessResponse "Perfil eliminado exitosamente"
+// @Failure 400 {object} response.ErrorResponse "ID inválido"
+// @Failure 401 {object} response.ErrorResponse "No autorizado"
+// @Failure 404 {object} response.ErrorResponse "Perfil no encontrado"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
 // @Router /api/profiles/{id} [delete]
 func (h *ProfileHandler) Delete(c *gin.Context) {
 	profileIDStr := c.Param("id")
@@ -113,17 +122,20 @@ func (h *ProfileHandler) Delete(c *gin.Context) {
 }
 
 // Update godoc
-// @Summary Actualiza un perfil
-// @Description Actualiza los datos de un perfil específico
-// @Tags profiles
+// @Summary Actualizar un perfil
+// @Description Actualiza un perfil específico del usuario autenticado
+// @Tags Profiles
+// @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Param id path int true "ID del perfil a actualizar"
-// @Param profile body request.UpdateProfileRequest true "Datos a actualizar"
-// @Success 200 {object} map[string]string "Perfil actualizado exitosamente"
-// @Failure 400 {object} response.ErrorResponse "Solicitud inválida o ID incorrecto"
-// @Router /api/profiles/{id} [patch]
+// @Param request body request.UpdateProfileRequest true "Datos del perfil a actualizar"
+// @Success 200 {object} response.SuccessResponse "Perfil actualizado exitosamente"
+// @Failure 400 {object} response.ErrorResponse "Solicitud inválida o ID inválido"
+// @Failure 401 {object} response.ErrorResponse "No autorizado"
+// @Failure 404 {object} response.ErrorResponse "Perfil no encontrado"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
+// @Router /api/profiles/{id} [put]
 func (h *ProfileHandler) Update(c *gin.Context) {
 	var req request.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

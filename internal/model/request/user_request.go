@@ -3,27 +3,31 @@ package request
 // RegisterRequest define la estructura para el registro de usuarios
 // swagger:model RegisterRequest
 type RegisterRequest struct {
-	// Email del usuario (debe ser válido)
+	// Email del usuario (debe ser unico y válido)
 	// required: true
 	// example: usuario@ejemplo.com
+	// format: email
 	Email string `json:"email" binding:"required,email"`
 
 	// Contraseña (mínimo 8 caracteres)
 	// required: true
 	// example: Password123!
+	// minLength: 8
 	Password string `json:"password" binding:"required,min=8"`
 }
 
 // LoginRequest define la estructura para el inicio de sesión
 // swagger:model LoginRequest
 type LoginRequest struct {
-	// Email del usuario
+	// Email del usuario registrado
 	// required: true
 	// example: usuario@ejemplo.com
+	// format: email
 	Email string `json:"email" binding:"required,email"`
 
 	// Contraseña del usuario
 	// required: true
 	// example: Password123!
+	// minLength: 8
 	Password string `json:"password" binding:"required"`
 }
