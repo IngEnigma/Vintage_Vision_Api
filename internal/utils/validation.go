@@ -5,7 +5,19 @@ import (
 	"regexp"
 	"unicode/utf8"
 	"vintage-vision-api/internal/model/request"
+
+	"vintage-vision-api/internal/constants"
 )
+
+var validGenres = map[string]bool{
+	constants.CategoryComedy:          true,
+	constants.CategoryDrama:           true,
+	constants.CategoryHorror:          true,
+	constants.CategorySciFi:           true,
+	constants.CategoryMusical:         true,
+	constants.CategoryPropaganda:      true,
+	constants.CategoryDibujosAnimados: true,
+}
 
 func IsValidEmail(email string) bool {
 	regex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
@@ -30,6 +42,18 @@ func IsValidProfileName(name string) bool {
 		return false
 	}
 	return true
+}
+
+func ValidatePaginationParams(page, limit int) (int, int) {
+	if page < 1 {
+		page = constants.DefaultPage
+	}
+	if limit < 1 {
+		limit = constants.DefaultLimit
+	} else if limit > constants.MaxLimit {
+		limit = constants.MaxLimit
+	}
+	return page, limit
 }
 
 func ValidateRegisterInput(req request.RegisterRequest) map[string]string {
@@ -140,4 +164,8 @@ func BuildMovieUpdateMap(req request.UpdateMovieRequest) map[string]interface{} 
 	}
 
 	return updates
+}
+
+func IsValidGenre(category string) bool {
+	return validGenres[category]
 }

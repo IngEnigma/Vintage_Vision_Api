@@ -5,31 +5,31 @@ package request
 type CreateMovieRequest struct {
 	// Título de la película
 	// required: true
-	Title string `json:"title"`
+	Title string `json:"title" bending:"required"`
 
 	// Descripción de la película
 	// required: true
-	Description string `json:"description"`
+	Description string `json:"description" bending:"required"`
 
 	// Año de lanzamiento de la película
 	// required: true
-	Year int `json:"year"`
+	Year int `json:"year" bending:"required"`
 
 	// URL de la imagen de portada
 	// required: true
-	ImageURL string `json:"image_url"`
+	ImageURL string `json:"image_url" bending:"required"`
 
 	// URL del video para streaming
 	// required: true
-	StreamURL string `json:"stream_url"`
+	StreamURL string `json:"stream_url" bending:"required"`
 
 	// Género de la película
 	// required: true
-	Genre string `json:"genre"`
+	Genre string `json:"genre" bending:"required"`
 
 	// Duración en minutos
 	// required: true
-	Duration int `json:"duration"`
+	Duration int `json:"duration" bending:"required"`
 }
 
 // UpdateMovieRequest representa el payload para actualizar una película.

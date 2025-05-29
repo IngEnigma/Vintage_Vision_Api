@@ -46,15 +46,20 @@ func publicRoutes(api *gin.RouterGroup, authHandler *handler.AuthHandler) {
 }
 
 func privateRoutes(private *gin.RouterGroup, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler) {
-	private.POST("/profiles", profileHandler.Create)
-	private.GET("/profiles", profileHandler.GetAll)
+	private.GET("/movies/genre", movieHandler.GetMoviesByGenre)
 	private.DELETE("/profiles/:id", profileHandler.Delete)
 	private.PATCH("/profiles/:id", profileHandler.Update)
+	private.GET("/movies/:id", movieHandler.GetByID)
+	private.POST("/profiles", profileHandler.Create)
+	private.GET("/profiles", profileHandler.GetAll)
 	private.GET("/movies", movieHandler.GetAll)
+	private.GET("/movies/detail/:id", movieHandler.GetMovieDetail)
+	private.GET("/movies/preview/:id", movieHandler.GetPreviewByGenre)
+	private.GET("/movies/player/:id", movieHandler.GetMoviePlayer)
 }
 
 func adminRoutes(admin *gin.RouterGroup, movieHandler *handler.MovieHandler) {
-	admin.POST("/movies", movieHandler.Create)
-	admin.PATCH("/movies/:id", movieHandler.Update)
 	admin.DELETE("/movies/:id", movieHandler.Delete)
+	admin.PATCH("/movies/:id", movieHandler.Update)
+	admin.POST("/movies", movieHandler.Create)
 }

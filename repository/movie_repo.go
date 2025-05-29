@@ -40,6 +40,23 @@ func (r *MovieRepo) GetAll(ctx context.Context, limit, offset int) ([]domain.Mov
 	return domainMovies, nil
 }
 
+func (r *MovieRepo) GetMoviesByGenre(ctx context.Context, genre string, page int, limit int) ([]domain.Movie, error) {
+	var entities []entity.Movie
+	err := r.DB.WithContext(ctx).Where("genre = ?", genre).Limit(limit).Offset((page - 1) * limit).Find(&entities).Error
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetMoviesByGenre, err)
+		return nil, err
+	}
+
+	domainMovies := make([]domain.Movie, len(entities))
+	for i, m := range entities {
+		domainMovies[i] = *mapper.ToDomainMovie(&m)
+	}
+
+	utils.Logger.Infof("%s: %s", constants.MsgMoviesRetrievedByGenre, genre)
+	return domainMovies, nil
+}
+
 func (r *MovieRepo) Create(ctx context.Context, movie *domain.Movie) error {
 	entityMovie := mapper.FromDomainMovie(movie)
 	err := r.DB.WithContext(ctx).Create(entityMovie).Error

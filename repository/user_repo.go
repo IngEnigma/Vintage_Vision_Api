@@ -38,7 +38,6 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.User) error {
 func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var entityUser entity.User
 	err := r.DB.WithContext(ctx).
-		Preload("Profiles.WatchHistory").
 		Where("email = ?", email).
 		First(&entityUser).Error
 

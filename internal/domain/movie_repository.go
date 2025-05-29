@@ -9,4 +9,5 @@ type MovieRepository interface {
 	Update(ctx context.Context, movie *Movie) error
 	UpdateFields(ctx context.Context, id uint, updates map[string]interface{}) error
 	Delete(ctx context.Context, id uint) error
+	GetMoviesByGenre(ctx context.Context, genre string, page int, limit int) ([]Movie, error)
 }

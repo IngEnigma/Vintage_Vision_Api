@@ -30,6 +30,7 @@ const (
 	MsgMovieDeletedLog             = "solicitud de eliminación de película con ID"
 	MsgMovieUpdatedFieldsLog       = "campos específicos de película actualizados para ID"
 	MsgMovieNotFound               = "película no encontrada con ID"
+	MsgMoviesRetrievedByGenre      = "películas obtenidas exitosamente por género"
 
 	// ==================================
 	// Éxito Perfiles
@@ -103,6 +104,7 @@ const (
 	ErrMsgDeleteMovieByID     = "error al eliminar la película con ID"
 	ErrMsgMovieNotFound       = "película no encontrada"
 	ErrMsgGetMovie            = "error al obtener la película"
+	ErrMsgGetMoviesByGenre    = "error al obtener películas por género"
 
 	// ==================================
 	// Errores de Validación
@@ -125,7 +127,9 @@ const (
 	ErrMsgMaxProfilesReached     = "ya tienes el número máximo de perfiles (4)"
 	ErrMsgProfileNameTaken       = "ya existe un perfil con ese nombre"
 	ErrMsgInvalidInput           = "datos de entrada inválidos"
-
+	ErrMsgInvalidGenre           = "género inválido"
+	ErrMsgInvalidLimit           = "límite inválido, debe ser un número entre 1 y 100"
+	ErrMsgInvalidPage            = "página inválida, debe ser un número mayor a 0"
 	// ==================================
 	// Errores Técnicos/Generales
 	// ==================================

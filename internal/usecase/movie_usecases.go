@@ -28,6 +28,21 @@ func (u *MovieUsecase) GetAll(ctx context.Context, limit, offset int) ([]domain.
 	return movies, nil
 }
 
+func (uc *MovieUsecase) GetMoviesByGenre(ctx context.Context, genre string, page int, limit int) ([]domain.Movie, error) {
+	if genre == "" {
+		utils.Logger.Warnf("%s: %s", constants.ErrMsgInvalidGenre, genre)
+		return nil, errors.New(constants.ErrMsgInvalidGenre)
+	}
+
+	if !utils.IsValidGenre(genre) {
+		utils.Logger.Warnf("%s: %s", constants.ErrMsgInvalidGenre, genre)
+		return nil, errors.New(constants.ErrMsgInvalidGenre)
+	}
+
+	page, limit = utils.ValidatePaginationParams(page, limit)
+	return uc.Repo.GetMoviesByGenre(ctx, genre, page, limit)
+}
+
 func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieRequest) (*domain.Movie, error) {
 	validationErrors := utils.ValidateCreateMovieInput(req)
 	if len(validationErrors) > 0 {

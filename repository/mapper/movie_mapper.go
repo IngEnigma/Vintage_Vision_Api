@@ -1,7 +1,9 @@
 package mapper
 
 import (
+	"strconv"
 	"vintage-vision-api/internal/domain"
+	"vintage-vision-api/internal/model/response"
 	"vintage-vision-api/repository/entity"
 )
 
@@ -39,5 +41,38 @@ func FromDomainMovie(d *domain.Movie) *entity.Movie {
 		StreamURL:      d.StreamURL,
 		Duration:       d.Duration,
 		WatchHistories: watchHistories,
+	}
+}
+
+func ToMoviePreview(m domain.Movie) response.MoviePreviewResponse {
+	return response.MoviePreviewResponse{
+		ID:       strconv.FormatUint(uint64(m.ID), 10),
+		ImageURL: m.ImageURL,
+	}
+}
+
+func ToMoviePreviewList(movies []domain.Movie) []response.MoviePreviewResponse {
+	previews := make([]response.MoviePreviewResponse, len(movies))
+	for i, m := range movies {
+		previews[i] = ToMoviePreview(m)
+	}
+	return previews
+}
+
+func ToMovieDetailResponse(m domain.Movie) response.MovieDetailResponse {
+	return response.MovieDetailResponse{
+		ID:          strconv.FormatUint(uint64(m.ID), 10),
+		Description: m.Description,
+		Genre:       m.Genre,
+		Year:        m.Year,
+		ImageURL:    m.ImageURL,
+	}
+}
+
+func ToMoviePlayerResponse(m *domain.Movie) response.MoviePlayerResponse {
+	return response.MoviePlayerResponse{
+		ID:        strconv.FormatUint(uint64(m.ID), 10),
+		Title:     m.Title,
+		StreamURL: m.StreamURL,
 	}
 }
