@@ -258,7 +258,7 @@ func (h *MovieHandler) GetByID(c *gin.Context) {
 // @Summary Crear película
 // @Description Crea una nueva película con sus archivos multimedia
 // @Tags Movies
-// @Accept mpfd
+// @Accept multipart/form-data
 // @Produce json
 // @Param title formData string true "Título"
 // @Param description formData string true "Descripción"
@@ -347,7 +347,7 @@ func (h *MovieHandler) Create(c *gin.Context) {
 // @Summary Actualizar película
 // @Description Actualiza los datos de una película existente
 // @Tags Movies
-// @Accept mpfd
+// @Accept multipart/form-data
 // @Produce json
 // @Param id path int true "ID de la película"
 // @Param title formData string false "Nuevo título"

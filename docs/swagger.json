@@ -61,6 +61,561 @@
                 }
             }
         },
+        "/api/movies": {
+            "get": {
+                "description": "Obtiene un listado paginado de películas",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener todas las películas",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Límite de resultados (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Desplazamiento (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de películas",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.MovieResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Crea una nueva película con sus archivos multimedia",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Crear película",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Título",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Descripción",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Año",
+                        "name": "year",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Género",
+                        "name": "genre",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Duración (minutos)",
+                        "name": "duration",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen de portada",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Archivo de video",
+                        "name": "video",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Película creada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Datos inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al crear",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movies/by-genre": {
+            "get": {
+                "description": "Obtiene películas filtradas por género con paginación",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener películas por género",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Género para filtrar",
+                        "name": "genre",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Página (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Límite por página (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultados paginados",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/response.MovieResponse"
+                                    }
+                                },
+                                "genre": {
+                                    "type": "string"
+                                },
+                                "limit": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "page": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Parámetros inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movies/preview": {
+            "get": {
+                "description": "Obtiene una vista previa de películas por género",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Vista previa por género",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Género para filtrar",
+                        "name": "genre",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Página (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Límite por página (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vista previa",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/response.MoviePreviewResponse"
+                                    }
+                                },
+                                "genre": {
+                                    "type": "string"
+                                },
+                                "limit": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "page": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Parámetros inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movies/{id}": {
+            "get": {
+                "description": "Obtiene todos los datos de una película",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener película completa",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos completos",
+                        "schema": {
+                            "$ref": "#/definitions/response.MovieResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Actualiza los datos de una película existente",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Actualizar película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nuevo título",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nueva descripción",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Nuevo año",
+                        "name": "year",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nuevo género",
+                        "name": "genre",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Nueva duración",
+                        "name": "duration",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Nueva imagen",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Nuevo video",
+                        "name": "video",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Película actualizada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Datos inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al actualizar",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Elimina una película existente",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Eliminar película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Película eliminada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al eliminar",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movies/{id}/detail": {
+            "get": {
+                "description": "Obtiene información detallada de una película específica",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener detalles de película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles completos",
+                        "schema": {
+                            "$ref": "#/definitions/response.MovieDetailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/movies/{id}/player": {
+            "get": {
+                "description": "Obtiene la información necesaria para reproducir la película",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener datos para reproductor",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos para reproductor",
+                        "schema": {
+                            "$ref": "#/definitions/response.MoviePlayerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/profiles": {
             "get": {
                 "security": [
@@ -425,6 +980,98 @@
                 },
                 "statusCode": {
                     "description": "Código de estado HTTP\nexample: 400",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.MovieDetailResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Descripción extendida de la película\nrequired: true\nexample: La saga de la familia Corleone, liderada por Vito Corleone y posteriormente por su hijo Michael.",
+                    "type": "string"
+                },
+                "genre": {
+                    "description": "Género principal de la película\nrequired: true\nexample: Crimen",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID único de la película en formato string\nrequired: true\nexample: \"1\"",
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "URL de la imagen en alta calidad\nrequired: true\nexample: https://cloudinary.com/example/padrino_detail.jpg",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "Año de lanzamiento\nrequired: true\nexample: 1972",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.MoviePlayerResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID único de la película en formato string\nrequired: true\nexample: \"1\"",
+                    "type": "string"
+                },
+                "stream_url": {
+                    "description": "URL del stream de video\nrequired: true\nexample: https://cloudinary.com/example/padrino_stream.m3u8",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Título de la película\nrequired: true\nexample: El Padrino",
+                    "type": "string"
+                }
+            }
+        },
+        "response.MoviePreviewResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID único de la película en formato string\nrequired: true\nexample: \"1\"",
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "URL de la imagen miniatura\nrequired: true\nexample: https://cloudinary.com/example/padrino_thumb.jpg",
+                    "type": "string"
+                }
+            }
+        },
+        "response.MovieResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Descripción de la película\nrequired: true\nexample: Una épica historia de crimen organizado en la América de los años 40",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duración en minutos\nrequired: true\nexample: 175",
+                    "type": "integer"
+                },
+                "genre": {
+                    "description": "Género de la película\nrequired: true\nexample: Drama",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID único de la película\nrequired: true\nexample: 1",
+                    "type": "integer"
+                },
+                "image_url": {
+                    "description": "URL de la imagen de portada\nrequired: true\nexample: https://cloudinary.com/example/padrino.jpg",
+                    "type": "string"
+                },
+                "stream_url": {
+                    "description": "URL del video para streaming\nrequired: true\nexample: https://cloudinary.com/example/padrino.mp4",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Título de la película\nrequired: true\nexample: El Padrino",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "Año de lanzamiento\nrequired: true\nexample: 1972",
                     "type": "integer"
                 }
             }

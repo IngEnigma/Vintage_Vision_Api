@@ -106,6 +106,126 @@ definitions:
           example: 400
         type: integer
     type: object
+  response.MovieDetailResponse:
+    properties:
+      description:
+        description: |-
+          Descripción extendida de la película
+          required: true
+          example: La saga de la familia Corleone, liderada por Vito Corleone y posteriormente por su hijo Michael.
+        type: string
+      genre:
+        description: |-
+          Género principal de la película
+          required: true
+          example: Crimen
+        type: string
+      id:
+        description: |-
+          ID único de la película en formato string
+          required: true
+          example: "1"
+        type: string
+      image_url:
+        description: |-
+          URL de la imagen en alta calidad
+          required: true
+          example: https://cloudinary.com/example/padrino_detail.jpg
+        type: string
+      year:
+        description: |-
+          Año de lanzamiento
+          required: true
+          example: 1972
+        type: integer
+    type: object
+  response.MoviePlayerResponse:
+    properties:
+      id:
+        description: |-
+          ID único de la película en formato string
+          required: true
+          example: "1"
+        type: string
+      stream_url:
+        description: |-
+          URL del stream de video
+          required: true
+          example: https://cloudinary.com/example/padrino_stream.m3u8
+        type: string
+      title:
+        description: |-
+          Título de la película
+          required: true
+          example: El Padrino
+        type: string
+    type: object
+  response.MoviePreviewResponse:
+    properties:
+      id:
+        description: |-
+          ID único de la película en formato string
+          required: true
+          example: "1"
+        type: string
+      image_url:
+        description: |-
+          URL de la imagen miniatura
+          required: true
+          example: https://cloudinary.com/example/padrino_thumb.jpg
+        type: string
+    type: object
+  response.MovieResponse:
+    properties:
+      description:
+        description: |-
+          Descripción de la película
+          required: true
+          example: Una épica historia de crimen organizado en la América de los años 40
+        type: string
+      duration:
+        description: |-
+          Duración en minutos
+          required: true
+          example: 175
+        type: integer
+      genre:
+        description: |-
+          Género de la película
+          required: true
+          example: Drama
+        type: string
+      id:
+        description: |-
+          ID único de la película
+          required: true
+          example: 1
+        type: integer
+      image_url:
+        description: |-
+          URL de la imagen de portada
+          required: true
+          example: https://cloudinary.com/example/padrino.jpg
+        type: string
+      stream_url:
+        description: |-
+          URL del video para streaming
+          required: true
+          example: https://cloudinary.com/example/padrino.mp4
+        type: string
+      title:
+        description: |-
+          Título de la película
+          required: true
+          example: El Padrino
+        type: string
+      year:
+        description: |-
+          Año de lanzamiento
+          required: true
+          example: 1972
+        type: integer
+    type: object
   response.ProfileResponse:
     properties:
       avatar_url:
@@ -182,6 +302,377 @@ paths:
       summary: Iniciar sesión
       tags:
       - Auth
+  /api/movies:
+    get:
+      description: Obtiene un listado paginado de películas
+      parameters:
+      - default: 10
+        description: Límite de resultados (default 10)
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Desplazamiento (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Listado de películas
+          schema:
+            items:
+              $ref: '#/definitions/response.MovieResponse'
+            type: array
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener todas las películas
+      tags:
+      - Movies
+    post:
+      consumes:
+      - multipart/form-data
+      description: Crea una nueva película con sus archivos multimedia
+      parameters:
+      - description: Título
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Descripción
+        in: formData
+        name: description
+        required: true
+        type: string
+      - description: Año
+        in: formData
+        name: year
+        required: true
+        type: integer
+      - description: Género
+        in: formData
+        name: genre
+        required: true
+        type: string
+      - description: Duración (minutos)
+        in: formData
+        name: duration
+        required: true
+        type: integer
+      - description: Imagen de portada
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Archivo de video
+        in: formData
+        name: video
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Película creada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al crear
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Crear película
+      tags:
+      - Movies
+  /api/movies/{id}:
+    delete:
+      description: Elimina una película existente
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Película eliminada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al eliminar
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Eliminar película
+      tags:
+      - Movies
+    get:
+      description: Obtiene todos los datos de una película
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Datos completos
+          schema:
+            $ref: '#/definitions/response.MovieResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener película completa
+      tags:
+      - Movies
+    put:
+      consumes:
+      - multipart/form-data
+      description: Actualiza los datos de una película existente
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nuevo título
+        in: formData
+        name: title
+        type: string
+      - description: Nueva descripción
+        in: formData
+        name: description
+        type: string
+      - description: Nuevo año
+        in: formData
+        name: year
+        type: integer
+      - description: Nuevo género
+        in: formData
+        name: genre
+        type: string
+      - description: Nueva duración
+        in: formData
+        name: duration
+        type: integer
+      - description: Nueva imagen
+        in: formData
+        name: image
+        type: file
+      - description: Nuevo video
+        in: formData
+        name: video
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Película actualizada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al actualizar
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Actualizar película
+      tags:
+      - Movies
+  /api/movies/{id}/detail:
+    get:
+      description: Obtiene información detallada de una película específica
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Detalles completos
+          schema:
+            $ref: '#/definitions/response.MovieDetailResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener detalles de película
+      tags:
+      - Movies
+  /api/movies/{id}/player:
+    get:
+      description: Obtiene la información necesaria para reproducir la película
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Datos para reproductor
+          schema:
+            $ref: '#/definitions/response.MoviePlayerResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener datos para reproductor
+      tags:
+      - Movies
+  /api/movies/by-genre:
+    get:
+      description: Obtiene películas filtradas por género con paginación
+      parameters:
+      - description: Género para filtrar
+        in: query
+        name: genre
+        required: true
+        type: string
+      - default: 1
+        description: Página (default 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Límite por página (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resultados paginados
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/response.MovieResponse'
+                type: array
+              genre:
+                type: string
+              limit:
+                type: integer
+              message:
+                type: string
+              page:
+                type: integer
+            type: object
+        "400":
+          description: Parámetros inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener películas por género
+      tags:
+      - Movies
+  /api/movies/preview:
+    get:
+      description: Obtiene una vista previa de películas por género
+      parameters:
+      - description: Género para filtrar
+        in: query
+        name: genre
+        required: true
+        type: string
+      - default: 1
+        description: Página (default 1)
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Límite por página (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Vista previa
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/response.MoviePreviewResponse'
+                type: array
+              genre:
+                type: string
+              limit:
+                type: integer
+              message:
+                type: string
+              page:
+                type: integer
+            type: object
+        "400":
+          description: Parámetros inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Vista previa por género
+      tags:
+      - Movies
   /api/profiles:
     get:
       description: Obtiene todos los perfiles del usuario autenticado
