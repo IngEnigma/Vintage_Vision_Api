@@ -9,6 +9,156 @@
     "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
+        "/api/admin/movies": {
+            "post": {
+                "description": "Crea una nueva película (recibe las URLs del frontend)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Crear película",
+                "parameters": [
+                    {
+                        "description": "Datos de la película",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateMovieRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Película creada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Datos inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al crear",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/movies/{id}": {
+            "put": {
+                "description": "Actualiza los datos de una película existente (recibe URLs desde el frontend)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Actualizar película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos actualizados",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateMovieRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Película actualizada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Datos inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al actualizar",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Elimina una película existente",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Eliminar película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Película eliminada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al eliminar",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
@@ -99,90 +249,6 @@
                     },
                     "500": {
                         "description": "Error interno del servidor",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Crea una nueva película con sus archivos multimedia",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Crear película",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Título",
-                        "name": "title",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Descripción",
-                        "name": "description",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Año",
-                        "name": "year",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Género",
-                        "name": "genre",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Duración (minutos)",
-                        "name": "duration",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Imagen de portada",
-                        "name": "image",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Archivo de video",
-                        "name": "video",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Película creada",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Datos inválidos",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Error al crear",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -380,141 +446,6 @@
                     },
                     "500": {
                         "description": "Error interno del servidor",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Actualiza los datos de una película existente",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Actualizar película",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID de la película",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Nuevo título",
-                        "name": "title",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Nueva descripción",
-                        "name": "description",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Nuevo año",
-                        "name": "year",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Nuevo género",
-                        "name": "genre",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Nueva duración",
-                        "name": "duration",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Nueva imagen",
-                        "name": "image",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Nuevo video",
-                        "name": "video",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Película actualizada",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Datos inválidos",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "No encontrado",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Error al actualizar",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Elimina una película existente",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Eliminar película",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID de la película",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Película eliminada",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "ID inválido",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "No encontrado",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Error al eliminar",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -891,6 +822,48 @@
         }
     },
     "definitions": {
+        "request.CreateMovieRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "duration",
+                "genre",
+                "image_url",
+                "stream_url",
+                "title",
+                "year"
+            ],
+            "properties": {
+                "description": {
+                    "description": "Descripción de la película\nrequired: true",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duración en minutos\nrequired: true",
+                    "type": "integer"
+                },
+                "genre": {
+                    "description": "Género de la película\nrequired: true",
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "URL de la imagen de portada\nrequired: true",
+                    "type": "string"
+                },
+                "stream_url": {
+                    "description": "URL del video para streaming\nrequired: true",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Título de la película\nrequired: true",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "Año de lanzamiento de la película\nrequired: true",
+                    "type": "integer"
+                }
+            }
+        },
         "request.CreateProfileRequest": {
             "type": "object",
             "required": [
@@ -940,6 +913,39 @@
                     "description": "Contraseña (mínimo 8 caracteres)\nrequired: true\nexample: Password123!\nminLength: 8",
                     "type": "string",
                     "minLength": 8
+                }
+            }
+        },
+        "request.UpdateMovieRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Nueva descripción de la película\nrequired: false",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Nueva duración en minutos\nrequired: false",
+                    "type": "integer"
+                },
+                "genre": {
+                    "description": "Nuevo género de la película\nrequired: false",
+                    "type": "string"
+                },
+                "image_url": {
+                    "description": "Nueva URL de la imagen de portada\nrequired: false",
+                    "type": "string"
+                },
+                "stream_url": {
+                    "description": "Nueva URL del video para streaming\nrequired: false",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Nuevo título de la película\nrequired: false",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "Nuevo año de lanzamiento\nrequired: false",
+                    "type": "integer"
                 }
             }
         },

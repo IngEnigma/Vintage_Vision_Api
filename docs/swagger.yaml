@@ -1,5 +1,51 @@
 basePath: /api
 definitions:
+  request.CreateMovieRequest:
+    properties:
+      description:
+        description: |-
+          Descripción de la película
+          required: true
+        type: string
+      duration:
+        description: |-
+          Duración en minutos
+          required: true
+        type: integer
+      genre:
+        description: |-
+          Género de la película
+          required: true
+        type: string
+      image_url:
+        description: |-
+          URL de la imagen de portada
+          required: true
+        type: string
+      stream_url:
+        description: |-
+          URL del video para streaming
+          required: true
+        type: string
+      title:
+        description: |-
+          Título de la película
+          required: true
+        type: string
+      year:
+        description: |-
+          Año de lanzamiento de la película
+          required: true
+        type: integer
+    required:
+    - description
+    - duration
+    - genre
+    - image_url
+    - stream_url
+    - title
+    - year
+    type: object
   request.CreateProfileRequest:
     properties:
       avatar_url:
@@ -61,6 +107,44 @@ definitions:
     required:
     - email
     - password
+    type: object
+  request.UpdateMovieRequest:
+    properties:
+      description:
+        description: |-
+          Nueva descripción de la película
+          required: false
+        type: string
+      duration:
+        description: |-
+          Nueva duración en minutos
+          required: false
+        type: integer
+      genre:
+        description: |-
+          Nuevo género de la película
+          required: false
+        type: string
+      image_url:
+        description: |-
+          Nueva URL de la imagen de portada
+          required: false
+        type: string
+      stream_url:
+        description: |-
+          Nueva URL del video para streaming
+          required: false
+        type: string
+      title:
+        description: |-
+          Nuevo título de la película
+          required: false
+        type: string
+      year:
+        description: |-
+          Nuevo año de lanzamiento
+          required: false
+        type: integer
     type: object
   request.UpdateProfileRequest:
     properties:
@@ -268,6 +352,106 @@ info:
   title: Vintage Vision API
   version: "1.0"
 paths:
+  /api/admin/movies:
+    post:
+      consumes:
+      - application/json
+      description: Crea una nueva película (recibe las URLs del frontend)
+      parameters:
+      - description: Datos de la película
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Película creada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al crear
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Crear película
+      tags:
+      - Movies
+  /api/admin/movies/{id}:
+    delete:
+      description: Elimina una película existente
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Película eliminada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al eliminar
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Eliminar película
+      tags:
+      - Movies
+    put:
+      consumes:
+      - application/json
+      description: Actualiza los datos de una película existente (recibe URLs desde
+        el frontend)
+      parameters:
+      - description: ID de la película
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos actualizados
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Película actualizada
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: No encontrado
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al actualizar
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Actualizar película
+      tags:
+      - Movies
   /api/login:
     post:
       consumes:
@@ -332,95 +516,7 @@ paths:
       summary: Obtener todas las películas
       tags:
       - Movies
-    post:
-      consumes:
-      - multipart/form-data
-      description: Crea una nueva película con sus archivos multimedia
-      parameters:
-      - description: Título
-        in: formData
-        name: title
-        required: true
-        type: string
-      - description: Descripción
-        in: formData
-        name: description
-        required: true
-        type: string
-      - description: Año
-        in: formData
-        name: year
-        required: true
-        type: integer
-      - description: Género
-        in: formData
-        name: genre
-        required: true
-        type: string
-      - description: Duración (minutos)
-        in: formData
-        name: duration
-        required: true
-        type: integer
-      - description: Imagen de portada
-        in: formData
-        name: image
-        required: true
-        type: file
-      - description: Archivo de video
-        in: formData
-        name: video
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Película creada
-          schema:
-            $ref: '#/definitions/response.SuccessResponse'
-        "400":
-          description: Datos inválidos
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "500":
-          description: Error al crear
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Crear película
-      tags:
-      - Movies
   /api/movies/{id}:
-    delete:
-      description: Elimina una película existente
-      parameters:
-      - description: ID de la película
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Película eliminada
-          schema:
-            $ref: '#/definitions/response.SuccessResponse'
-        "400":
-          description: ID inválido
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "404":
-          description: No encontrado
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "500":
-          description: Error al eliminar
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Eliminar película
-      tags:
-      - Movies
     get:
       description: Obtiene todos los datos de una película
       parameters:
@@ -449,66 +545,6 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Obtener película completa
-      tags:
-      - Movies
-    put:
-      consumes:
-      - multipart/form-data
-      description: Actualiza los datos de una película existente
-      parameters:
-      - description: ID de la película
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Nuevo título
-        in: formData
-        name: title
-        type: string
-      - description: Nueva descripción
-        in: formData
-        name: description
-        type: string
-      - description: Nuevo año
-        in: formData
-        name: year
-        type: integer
-      - description: Nuevo género
-        in: formData
-        name: genre
-        type: string
-      - description: Nueva duración
-        in: formData
-        name: duration
-        type: integer
-      - description: Nueva imagen
-        in: formData
-        name: image
-        type: file
-      - description: Nuevo video
-        in: formData
-        name: video
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Película actualizada
-          schema:
-            $ref: '#/definitions/response.SuccessResponse'
-        "400":
-          description: Datos inválidos
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "404":
-          description: No encontrado
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-        "500":
-          description: Error al actualizar
-          schema:
-            $ref: '#/definitions/response.ErrorResponse'
-      summary: Actualizar película
       tags:
       - Movies
   /api/movies/{id}/detail:
