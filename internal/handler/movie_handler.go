@@ -269,11 +269,15 @@ func (h *MovieHandler) Create(c *gin.Context) {
 
 	var req request.CreateMovieRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.Logger.Warnf("Error al parsear JSON en CreateMovie: %v", err)
 		utils.HandleError(c, http.StatusBadRequest, constants.ErrMsgInvalidRequest, err)
 		return
 	}
 
+	utils.Logger.Infof("Payload recibido en CreateMovie: %+v", req)
+
 	if _, err := h.Usecase.Create(ctx, req); err != nil {
+		utils.Logger.Errorf("Error en Usecase.Create: %v", err)
 		utils.HandleError(c, http.StatusInternalServerError, constants.ErrMsgCreateMovie, err)
 		return
 	}

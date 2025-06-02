@@ -7,12 +7,12 @@ import (
 type Movie struct {
 	gorm.Model
 	Title       string `gorm:"not null;size:200"`
-	Description string
-	Year        int
-	Genre       string
-	ImageURL    string
-	StreamURL   string `gorm:"not null;size:500"`
-	Duration    int
+	Description string `gorm:"not null"`
+	Year        int    `gorm:"not null"`
+	Genre       string `gorm:"not null"`
+	ImageURL    string `gorm:"not null"`
+	StreamURL   string `gorm:"not null"`
+	Duration    int    `gorm:"not null"`
 
 	WatchHistories []WatchHistory `gorm:"foreignKey:MovieID"`
 }

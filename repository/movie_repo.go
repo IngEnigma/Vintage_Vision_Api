@@ -59,6 +59,9 @@ func (r *MovieRepo) GetMoviesByGenre(ctx context.Context, genre string, page int
 
 func (r *MovieRepo) Create(ctx context.Context, movie *domain.Movie) error {
 	entityMovie := mapper.FromDomainMovie(movie)
+
+	utils.Logger.Infof("Entidad lista para insertar en DB: %+v", entityMovie)
+
 	err := r.DB.WithContext(ctx).Create(entityMovie).Error
 	if err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgCreateMovie, err)

@@ -50,6 +50,8 @@ func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieReques
 		return nil, errors.New(constants.ErrMsgInvalidInput)
 	}
 
+	utils.Logger.Infof("Request válido. Construyendo entidad Movie: %+v", req)
+
 	movie := domain.Movie{
 		Title:       req.Title,
 		Description: req.Description,
@@ -59,6 +61,8 @@ func (u *MovieUsecase) Create(ctx context.Context, req request.CreateMovieReques
 		Genre:       req.Genre,
 		Duration:    req.Duration,
 	}
+
+	utils.Logger.Infof("Movie construido desde request: %+v", movie)
 
 	if err := u.Repo.Create(ctx, &movie); err != nil {
 		utils.Logger.Errorf("%s: %v", constants.ErrMsgCreateMovie, err)
