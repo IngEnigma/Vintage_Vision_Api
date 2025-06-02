@@ -61,7 +61,11 @@ func main() {
 	movieUC := usecase.NewMovieUsecase(movieRepo)
 	movieHandler := handler.NewMovieHandler(movieUC)
 
-	r := router.SetupRouter(authHandler, profileHandler, movieHandler)
+	partyRepo := repository.NewPartyRepo(dbConn.DB)
+	partyUC := usecase.NewPartyUsecase(partyRepo)
+	partyHandler := handler.NewPartyHandler(partyUC)
+
+	r := router.SetupRouter(authHandler, profileHandler, movieHandler, partyHandler)
 
 	utils.Logger.Info(constants.MsgServerStartedSuccessfully)
 	if err := r.Run(":8080"); err != nil {

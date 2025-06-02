@@ -298,7 +298,7 @@ func (h *MovieHandler) Create(c *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse "Datos inválidos"
 // @Failure 404 {object} response.ErrorResponse "No encontrado"
 // @Failure 500 {object} response.ErrorResponse "Error al actualizar"
-// @Router /api/admin/movies/{id} [put]
+// @Router /api/admin/movies/{id} [patch]
 func (h *MovieHandler) Update(c *gin.Context) {
 	ctx := c.Request.Context()
 

@@ -62,7 +62,52 @@ const docTemplate = `{
             }
         },
         "/api/admin/movies/{id}": {
-            "put": {
+            "delete": {
+                "description": "Elimina una película existente",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Eliminar película",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la película",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Película eliminada",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al eliminar",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
                 "description": "Actualiza los datos de una película existente (recibe URLs desde el frontend)",
                 "consumes": [
                     "application/json"
@@ -113,51 +158,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Error al actualizar",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Elimina una película existente",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Eliminar película",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID de la película",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Película eliminada",
-                        "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "ID inválido",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "No encontrado",
-                        "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Error al eliminar",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -553,6 +553,103 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/party": {
+            "post": {
+                "description": "Crea una nueva party con el host y película especificados",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parties"
+                ],
+                "summary": "Crear una nueva party",
+                "parameters": [
+                    {
+                        "description": "Datos para crear la party",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreatePartyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Party creada exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Entrada inválida",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al crear la party",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/party/join/{code}": {
+            "post": {
+                "description": "Permite a un perfil unirse a una party usando su código",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parties"
+                ],
+                "summary": "Unirse a una party existente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Código de la party",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID del perfil",
+                        "name": "profile_id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unión exitosa a la party",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Código de party o ID de perfil faltante",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error al unirse a la party",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/profiles": {
             "get": {
                 "security": [
@@ -841,31 +938,48 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "description": "Descripción de la película\nrequired: true",
+                    "description": "Descripción de la película\nexample: \"Una aventura épica\"\nrequired: true",
                     "type": "string"
                 },
                 "duration": {
-                    "description": "Duración en minutos\nrequired: true",
+                    "description": "Duración en minutos\nexample: 120\nrequired: true",
                     "type": "integer"
                 },
                 "genre": {
-                    "description": "Género de la película\nrequired: true",
+                    "description": "Género de la película\nexample: \"Aventura\"\nrequired: true",
                     "type": "string"
                 },
                 "image_url": {
-                    "description": "URL de la imagen de portada\nrequired: true",
+                    "description": "URL de la imagen de portada\nexample: \"https://example.com/image.jpg\"\nrequired: true",
                     "type": "string"
                 },
                 "stream_url": {
-                    "description": "URL del video para streaming\nrequired: true",
+                    "description": "URL del video para streaming\nexample: \"https://example.com/stream.mp4\"\nrequired: true",
                     "type": "string"
                 },
                 "title": {
-                    "description": "Título de la película\nrequired: true",
+                    "description": "Título de la película\nexample: \"El Gran Viaje\"\nrequired: true",
                     "type": "string"
                 },
                 "year": {
-                    "description": "Año de lanzamiento de la película\nrequired: true",
+                    "description": "Año de lanzamiento de la película\nexample: 1980\nrequired: true",
+                    "type": "integer"
+                }
+            }
+        },
+        "request.CreatePartyRequest": {
+            "type": "object",
+            "required": [
+                "host_id",
+                "movie_id"
+            ],
+            "properties": {
+                "host_id": {
+                    "description": "ID del usuario que será el anfitrión de la party\nexample: 1\nrequired: true",
+                    "type": "integer"
+                },
+                "movie_id": {
+                    "description": "ID de la película que se verá en la party\nexample: 42\nrequired: true",
                     "type": "integer"
                 }
             }
@@ -926,31 +1040,31 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
-                    "description": "Nueva descripción de la película\nrequired: false",
+                    "description": "Nueva descripción de la película\nexample: \"Una aventura épica con escenas adicionales\"\nrequired: false",
                     "type": "string"
                 },
                 "duration": {
-                    "description": "Nueva duración en minutos\nrequired: false",
+                    "description": "Nueva duración en minutos\nexample: 150\nrequired: false",
                     "type": "integer"
                 },
                 "genre": {
-                    "description": "Nuevo género de la película\nrequired: false",
+                    "description": "Nuevo género de la película\nexample: \"Aventura - Edición Especial\"\nrequired: false",
                     "type": "string"
                 },
                 "image_url": {
-                    "description": "Nueva URL de la imagen de portada\nrequired: false",
+                    "description": "Nueva URL de la imagen de portada\nexample: \"https://example.com/new_image.jpg\"\nrequired: false",
                     "type": "string"
                 },
                 "stream_url": {
-                    "description": "Nueva URL del video para streaming\nrequired: false",
+                    "description": "Nueva URL del video para streaming\nexample: \"https://example.com/new_stream.mp4\"\nrequired: false",
                     "type": "string"
                 },
                 "title": {
-                    "description": "Nuevo título de la película\nrequired: false",
+                    "description": "Nuevo título de la película\nexample: \"El Gran Viaje - Edición Especial\"\nrequired: false",
                     "type": "string"
                 },
                 "year": {
-                    "description": "Nuevo año de lanzamiento\nrequired: false",
+                    "description": "Nuevo año de lanzamiento\nexample: 1981\nrequired: false",
                     "type": "integer"
                 }
             }

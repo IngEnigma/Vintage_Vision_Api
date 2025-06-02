@@ -11,7 +11,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRouter(authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler) *gin.Engine {
+func SetupRouter(authHandler *handler.AuthHandler, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler, partyHandler *handler.PartyHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -30,7 +30,7 @@ func SetupRouter(authHandler *handler.AuthHandler, profileHandler *handler.Profi
 		publicRoutes(api, authHandler)
 		private := api.Group("/")
 		private.Use(middleware.AuthMiddleware())
-		privateRoutes(private, profileHandler, movieHandler)
+		privateRoutes(private, profileHandler, movieHandler, partyHandler)
 
 		admin := api.Group("/admin")
 		admin.Use(middleware.AuthMiddleware(), middleware.AdminOnly())
@@ -45,7 +45,7 @@ func publicRoutes(api *gin.RouterGroup, authHandler *handler.AuthHandler) {
 	api.POST("/login", authHandler.Login)
 }
 
-func privateRoutes(private *gin.RouterGroup, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler) {
+func privateRoutes(private *gin.RouterGroup, profileHandler *handler.ProfileHandler, movieHandler *handler.MovieHandler, partyHandler *handler.PartyHandler) {
 	private.GET("/movies/genre", movieHandler.GetMoviesByGenre)
 	private.DELETE("/profiles/:id", profileHandler.Delete)
 	private.PATCH("/profiles/:id", profileHandler.Update)
@@ -56,6 +56,8 @@ func privateRoutes(private *gin.RouterGroup, profileHandler *handler.ProfileHand
 	private.GET("/movies/detail/:id", movieHandler.GetMovieDetail)
 	private.GET("/movies/preview/:id", movieHandler.GetPreviewByGenre)
 	private.GET("/movies/player/:id", movieHandler.GetMoviePlayer)
+	private.POST("/party", partyHandler.CreateParty)
+	private.POST("/party/join/:code", partyHandler.JoinParty)
 }
 
 func adminRoutes(admin *gin.RouterGroup, movieHandler *handler.MovieHandler) {

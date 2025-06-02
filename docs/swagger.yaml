@@ -5,36 +5,43 @@ definitions:
       description:
         description: |-
           Descripción de la película
+          example: "Una aventura épica"
           required: true
         type: string
       duration:
         description: |-
           Duración en minutos
+          example: 120
           required: true
         type: integer
       genre:
         description: |-
           Género de la película
+          example: "Aventura"
           required: true
         type: string
       image_url:
         description: |-
           URL de la imagen de portada
+          example: "https://example.com/image.jpg"
           required: true
         type: string
       stream_url:
         description: |-
           URL del video para streaming
+          example: "https://example.com/stream.mp4"
           required: true
         type: string
       title:
         description: |-
           Título de la película
+          example: "El Gran Viaje"
           required: true
         type: string
       year:
         description: |-
           Año de lanzamiento de la película
+          example: 1980
           required: true
         type: integer
     required:
@@ -45,6 +52,24 @@ definitions:
     - stream_url
     - title
     - year
+    type: object
+  request.CreatePartyRequest:
+    properties:
+      host_id:
+        description: |-
+          ID del usuario que será el anfitrión de la party
+          example: 1
+          required: true
+        type: integer
+      movie_id:
+        description: |-
+          ID de la película que se verá en la party
+          example: 42
+          required: true
+        type: integer
+    required:
+    - host_id
+    - movie_id
     type: object
   request.CreateProfileRequest:
     properties:
@@ -113,36 +138,43 @@ definitions:
       description:
         description: |-
           Nueva descripción de la película
+          example: "Una aventura épica con escenas adicionales"
           required: false
         type: string
       duration:
         description: |-
           Nueva duración en minutos
+          example: 150
           required: false
         type: integer
       genre:
         description: |-
           Nuevo género de la película
+          example: "Aventura - Edición Especial"
           required: false
         type: string
       image_url:
         description: |-
           Nueva URL de la imagen de portada
+          example: "https://example.com/new_image.jpg"
           required: false
         type: string
       stream_url:
         description: |-
           Nueva URL del video para streaming
+          example: "https://example.com/new_stream.mp4"
           required: false
         type: string
       title:
         description: |-
           Nuevo título de la película
+          example: "El Gran Viaje - Edición Especial"
           required: false
         type: string
       year:
         description: |-
           Nuevo año de lanzamiento
+          example: 1981
           required: false
         type: integer
     type: object
@@ -413,7 +445,7 @@ paths:
       summary: Eliminar película
       tags:
       - Movies
-    put:
+    patch:
       consumes:
       - application/json
       description: Actualiza los datos de una película existente (recibe URLs desde
@@ -709,6 +741,70 @@ paths:
       summary: Vista previa por género
       tags:
       - Movies
+  /api/party:
+    post:
+      consumes:
+      - application/json
+      description: Crea una nueva party con el host y película especificados
+      parameters:
+      - description: Datos para crear la party
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreatePartyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Party creada exitosamente
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Entrada inválida
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al crear la party
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Crear una nueva party
+      tags:
+      - Parties
+  /api/party/join/{code}:
+    post:
+      consumes:
+      - application/json
+      description: Permite a un perfil unirse a una party usando su código
+      parameters:
+      - description: Código de la party
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: ID del perfil
+        in: header
+        name: profile_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unión exitosa a la party
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Código de party o ID de perfil faltante
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error al unirse a la party
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Unirse a una party existente
+      tags:
+      - Parties
   /api/profiles:
     get:
       description: Obtiene todos los perfiles del usuario autenticado
