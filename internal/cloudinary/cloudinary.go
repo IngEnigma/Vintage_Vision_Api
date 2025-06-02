@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	imageUploadTimeout = 30 * time.Second
-	videoUploadTimeout = 60 * time.Second
+	imageUploadTimeout = 60 * time.Second
+	videoUploadTimeout = 5 * time.Minute
 	publicFolder       = "movies/"
 )
 

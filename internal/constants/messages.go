@@ -33,6 +33,12 @@ const (
 	MsgMoviesRetrievedByGenre      = "películas obtenidas exitosamente por género"
 
 	// ==================================
+	// Éxito Fiestas
+	// ==================================
+	MsgPartyCreatedSuccessfully   = "fiesta creada exitosamente"
+	MsgPartyRetrievedSuccessfully = "fiesta obtenida exitosamente"
+
+	// ==================================
 	// Éxito Perfiles
 	// ==================================
 	MsgProfileCreatedSuccessfully    = "Perfil creado con éxito para el usuario ID"
@@ -50,11 +56,12 @@ const (
 	// ==================================
 	// Éxito Usuarios
 	// ==================================
-	MsgLoginSuccessful            = "inicio de sesión exitoso"
-	MsgUserCreatedSuccessfully    = "usuario creado exitosamente en base de datos"
-	MsgUserFoundByEmail           = "usuario encontrado por email"
-	MsgUserLoggedInSuccessfully   = "usuario autenticado correctamente"
-	MsgUserRegisteredSuccessfully = "usuario registrado correctamente"
+	MsgLoginSuccessful                  = "inicio de sesión exitoso"
+	MsgUserCreatedSuccessfully          = "usuario creado exitosamente en base de datos"
+	MsgUserFoundByEmail                 = "usuario encontrado por email"
+	MsgUserLoggedInSuccessfully         = "usuario autenticado correctamente"
+	MsgUserRegisteredSuccessfully       = "usuario registrado correctamente"
+	MsgProfileNameRetrievedSuccessfully = "nombre del perfil obtenido exitosamente"
 
 	// ==================================
 	// Errores de Archivos/Cloudinary
@@ -79,32 +86,40 @@ const (
 	// ==================================
 	// Errores de Base de Datos
 	// ==================================
-	ErrMsgCreateMovie         = "error al crear la película"
-	ErrMsgCreateUser          = "error al crear el usuario en la base de datos"
-	ErrMsgDBAccessDenied      = "acceso denegado a la base de datos"
-	ErrMsgDBConnection        = "no se pudo conectar a la base de datos"
-	ErrMsgDBMigration         = "error al ejecutar las migraciones"
-	ErrMsgDeleteMovie         = "error al eliminar la película"
-	ErrMsgDeleteProfile       = "error al eliminar el perfil"
-	ErrMsgFindUserByEmail     = "error al buscar el usuario por email"
-	ErrMsgGetMovieByID        = "error al obtener la película por ID"
-	ErrMsgGetMovies           = "error al obtener las películas"
-	ErrMsgGetProfile          = "error al obtener el perfil"
-	ErrMsgGetProfiles         = "error al obtener los perfiles"
-	ErrMsgGetUpdatedMovie     = "error al obtener la película actualizada"
-	ErrMsgProfileNotFound     = "perfil no encontrado o no permitido"
-	ErrMsgRegisterProfile     = "no se pudo registrar el perfil"
-	ErrMsgRegisterUser        = "no se pudo registrar el usuario"
-	ErrMsgUpdateMovie         = "error al actualizar la película"
-	ErrMsgUpdateProfile       = "error al actualizar el perfil"
-	ErrMsgUserNotFound        = "inicio de sesión fallido - usuario no encontrado"
-	ErrMsgUserNotFoundByEmail = "usuario no encontrado con ese email"
-	ErrMsgUpdateMovieFieldsDB = "error al actualizar campos de la película"
-	ErrMsgGetMovieAll         = "error al obtener todas las películas"
-	ErrMsgDeleteMovieByID     = "error al eliminar la película con ID"
-	ErrMsgMovieNotFound       = "película no encontrada"
-	ErrMsgGetMovie            = "error al obtener la película"
-	ErrMsgGetMoviesByGenre    = "error al obtener películas por género"
+	ErrMsgCreateMovie          = "error al crear la película"
+	ErrMsgCreateUser           = "error al crear el usuario en la base de datos"
+	ErrMsgDBAccessDenied       = "acceso denegado a la base de datos"
+	ErrMsgDBConnection         = "no se pudo conectar a la base de datos"
+	ErrMsgDBMigration          = "error al ejecutar las migraciones"
+	ErrMsgDeleteMovie          = "error al eliminar la película"
+	ErrMsgDeleteProfile        = "error al eliminar el perfil"
+	ErrMsgFindUserByEmail      = "error al buscar el usuario por email"
+	ErrMsgGetMovieByID         = "error al obtener la película por ID"
+	ErrMsgGetMovies            = "error al obtener las películas"
+	ErrMsgGetProfile           = "error al obtener el perfil"
+	ErrMsgGetProfiles          = "error al obtener los perfiles"
+	ErrMsgGetUpdatedMovie      = "error al obtener la película actualizada"
+	ErrMsgProfileNotFound      = "perfil no encontrado o no permitido"
+	ErrMsgRegisterProfile      = "no se pudo registrar el perfil"
+	ErrMsgRegisterUser         = "no se pudo registrar el usuario"
+	ErrMsgUpdateMovie          = "error al actualizar la película"
+	ErrMsgUpdateProfile        = "error al actualizar el perfil"
+	ErrMsgUserNotFound         = "inicio de sesión fallido - usuario no encontrado"
+	ErrMsgUserNotFoundByEmail  = "usuario no encontrado con ese email"
+	ErrMsgUpdateMovieFieldsDB  = "error al actualizar campos de la película"
+	ErrMsgGetMovieAll          = "error al obtener todas las películas"
+	ErrMsgDeleteMovieByID      = "error al eliminar la película con ID"
+	ErrMsgMovieNotFound        = "película no encontrada"
+	ErrMsgGetMovie             = "error al obtener la película"
+	ErrMsgGetMoviesByGenre     = "error al obtener películas por género"
+	ErrMsgCreateParty          = "error al crear la fiesta"
+	ErrMsgPartyNotFound        = "fiesta no encontrada"
+	ErrMsgFindPartyByCode      = "error al buscar la fiesta por código"
+	ErrMsgCheckPartyMembership = "error al verificar la membresía de la fiesta"
+	ErrMsgAddPartyMember       = "error al agregar miembro a la fiesta"
+	ErrMsgRemovePartyMember    = "error al eliminar miembro de la fiesta"
+	ErrMsgAlreadyInParty       = "ya estás en la fiesta"
+	ErrMsgGetProfileName       = "error al obtener el nombre del perfil"
 
 	// ==================================
 	// Errores de Validación

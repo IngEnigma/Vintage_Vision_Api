@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"unicode/utf8"
+	"vintage-vision-api/internal/model"
 	"vintage-vision-api/internal/model/request"
 
 	"vintage-vision-api/internal/constants"
@@ -168,4 +170,18 @@ func BuildMovieUpdateMap(req request.UpdateMovieRequest) map[string]interface{} 
 
 func IsValidGenre(category string) bool {
 	return validGenres[category]
+}
+
+func ValidateWebSocketMessage(msg model.WebSocketMessage) error {
+	validEvents := map[string]bool{
+		"play":  true,
+		"pause": true,
+		"seek":  true,
+		"chat":  true,
+	}
+
+	if !validEvents[msg.Event] {
+		return fmt.Errorf("invalid event: %s", msg.Event)
+	}
+	return nil
 }

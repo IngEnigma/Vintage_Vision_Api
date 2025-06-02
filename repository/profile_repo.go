@@ -105,3 +105,20 @@ func (r *ProfileRepo) FindByIDAndUser(ctx context.Context, profileID, userID uin
 	utils.Logger.Infof("%s: profileID=%d, userID=%d", constants.MsgProfileRetrievedSuccessfully, profileID, userID)
 	return domainProfile, nil
 }
+
+func (r *ProfileRepo) GetNameByID(ctx context.Context, profileID uint) (string, error) {
+	var entityProfile entity.Profile
+	err := r.DB.WithContext(ctx).Select("name").Where("id = ?", profileID).First(&entityProfile).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			utils.Logger.Warnf("%s: profileID=%d", constants.ErrMsgProfileNotFound, profileID)
+			return "", ErrProfileNotFound
+		}
+		utils.Logger.Errorf("%s: profileID=%d, error=%v", constants.ErrMsgGetProfileName, profileID, err)
+		return "", err
+	}
+
+	domainProfile := mapper.ToDomainProfile(&entityProfile)
+	utils.Logger.Infof("%s: profileID=%d, name=%s", constants.MsgProfileNameRetrievedSuccessfully, profileID, entityProfile.Name)
+	return domainProfile.Name, nil
+}
