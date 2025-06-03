@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/model/request"
+	"vintage-vision-api/internal/model/response"
 	"vintage-vision-api/internal/usecase"
 	"vintage-vision-api/internal/utils"
 
@@ -49,9 +50,9 @@ func (h *PartyHandler) CreateParty(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message":    "Party created successfully",
-		"party_code": party.PartyCode,
+	c.JSON(http.StatusCreated, response.CreatePartyResponse{
+		Message:   "Party created successfully",
+		PartyCode: party.PartyCode,
 	})
 }
 
