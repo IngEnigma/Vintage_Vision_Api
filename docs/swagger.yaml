@@ -342,6 +342,19 @@ definitions:
           example: 1972
         type: integer
     type: object
+  response.MovieTitleResponse:
+    properties:
+      id:
+        description: |-
+          Películas obtenidas
+          required: true
+        type: string
+      title:
+        description: |-
+          Título de la película
+          required: true
+        type: string
+    type: object
   response.ProfileResponse:
     properties:
       avatar_url:
@@ -739,6 +752,43 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Vista previa por género
+      tags:
+      - Movies
+  /api/movies/search:
+    get:
+      description: Obtiene una lista de películas que coinciden con el título
+      parameters:
+      - description: Título de la película
+        in: query
+        name: title
+        required: true
+        type: string
+      - default: 1
+        description: Página (default 1)
+        in: query
+        name: page
+        type: integer
+      - default: 5
+        description: Límite por página (default 5)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Películas encontradas
+          schema:
+            $ref: '#/definitions/response.MovieTitleResponse'
+        "400":
+          description: Parámetros inválidos
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Obtener películas por título
       tags:
       - Movies
   /api/party:

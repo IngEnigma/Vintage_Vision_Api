@@ -7,6 +7,7 @@ import (
 	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
 	"vintage-vision-api/internal/model/request"
+	"vintage-vision-api/internal/model/response"
 	"vintage-vision-api/internal/utils"
 )
 
@@ -127,4 +128,18 @@ func (u *MovieUsecase) GetByID(ctx context.Context, id uint) (*domain.Movie, err
 
 	utils.Logger.Infof("%s con ID %d", constants.MsgMovieRetrievedSuccessfully, id)
 	return movie, nil
+}
+
+func (u *MovieUsecase) GetMoviesByTitle(ctx context.Context, title string, page, limit int) ([]response.MovieTitleResponse, error) {
+	if title == "" {
+		return nil, errors.New(constants.ErrMsgInvalidTitle)
+	}
+
+	titleMovies, err := u.Repo.GetMoviesByTitle(ctx, title, page, limit)
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetMoviesByTitle, err)
+		return nil, err
+	}
+
+	return titleMovies, nil
 }

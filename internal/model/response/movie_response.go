@@ -105,3 +105,15 @@ type MoviePlayerResponse struct {
 	// example: https://cloudinary.com/example/padrino_stream.m3u8
 	StreamURL string `json:"stream_url"`
 }
+
+// MovieListResponse representa una lista de películas con paginación.
+// swagger:model MovieListResponse
+type MovieTitleResponse struct {
+	// Películas obtenidas
+	// required: true
+	ID string `json:"id"`
+
+	// Título de la película
+	// required: true
+	Title string `json:"title"`
+}

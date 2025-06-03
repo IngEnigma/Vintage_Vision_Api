@@ -76,3 +76,10 @@ func ToMoviePlayerResponse(m *domain.Movie) response.MoviePlayerResponse {
 		StreamURL: m.StreamURL,
 	}
 }
+
+func ToMovieTitleResponse(m *domain.Movie) response.MovieTitleResponse {
+	return response.MovieTitleResponse{
+		ID:    strconv.FormatUint(uint64(m.ID), 10),
+		Title: m.Title,
+	}
+}

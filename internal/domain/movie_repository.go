@@ -1,6 +1,9 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"vintage-vision-api/internal/model/response"
+)
 
 type MovieRepository interface {
 	GetAll(ctx context.Context, limit, offset int) ([]Movie, error)
@@ -10,4 +13,5 @@ type MovieRepository interface {
 	UpdateFields(ctx context.Context, id uint, updates map[string]interface{}) error
 	Delete(ctx context.Context, id uint) error
 	GetMoviesByGenre(ctx context.Context, genre string, page int, limit int) ([]Movie, error)
+	GetMoviesByTitle(ctx context.Context, title string, page int, limit int) ([]response.MovieTitleResponse, error)
 }

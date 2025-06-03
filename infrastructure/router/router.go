@@ -58,6 +58,7 @@ func privateRoutes(private *gin.RouterGroup, profileHandler *handler.ProfileHand
 	private.GET("/movies/player/:id", movieHandler.GetMoviePlayer)
 	private.POST("/party", partyHandler.CreateParty)
 	private.POST("/party/join/:code", partyHandler.JoinParty)
+	private.GET("/movies/search", movieHandler.GetMoviesByTitle)
 }
 
 func adminRoutes(admin *gin.RouterGroup, movieHandler *handler.MovieHandler) {

@@ -31,6 +31,7 @@ const (
 	MsgMovieUpdatedFieldsLog       = "campos específicos de película actualizados para ID"
 	MsgMovieNotFound               = "película no encontrada con ID"
 	MsgMoviesRetrievedByGenre      = "películas obtenidas exitosamente por género"
+	MsgMoviesRetrievedByTitle      = "películas obtenidas exitosamente por título"
 
 	// ==================================
 	// Éxito Fiestas
@@ -120,6 +121,7 @@ const (
 	ErrMsgRemovePartyMember    = "error al eliminar miembro de la fiesta"
 	ErrMsgAlreadyInParty       = "ya estás en la fiesta"
 	ErrMsgGetProfileName       = "error al obtener el nombre del perfil"
+	ErrMsgGetMoviesByTitle     = "error al obtener películas por título"
 
 	// ==================================
 	// Errores de Validación
@@ -145,6 +147,7 @@ const (
 	ErrMsgInvalidGenre           = "género inválido"
 	ErrMsgInvalidLimit           = "límite inválido, debe ser un número entre 1 y 100"
 	ErrMsgInvalidPage            = "página inválida, debe ser un número mayor a 0"
+	ErrMsgInvalidTitle           = "título inválido, debe tener entre 1 y 100 caracteres"
 	// ==================================
 	// Errores Técnicos/Generales
 	// ==================================

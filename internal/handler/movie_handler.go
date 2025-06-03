@@ -253,6 +253,33 @@ func (h *MovieHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, movie)
 }
 
+// GetMoviesByTitle godoc
+// @Summary Obtener películas por título
+// @Description Obtiene una lista de películas que coinciden con el título
+// @Tags Movies
+// @Produce json
+// @Param title query string true "Título de la película"
+// @Param page query int false "Página (default 1)" default(1)
+// @Param limit query int false "Límite por página (default 5)" default(5)
+// @Success 200 {object} response.MovieTitleResponse "Películas encontradas"
+// @Failure 400 {object} response.ErrorResponse "Parámetros inválidos"
+// @Failure 500 {object} response.ErrorResponse "Error interno del servidor"
+// @Router /api/movies/search [get]
+func (h *MovieHandler) GetMoviesByTitle(c *gin.Context) {
+	title := c.Query("title")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+
+	results, err := h.Usecase.GetMoviesByTitle(c.Request.Context(), title, page, limit)
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetMoviesByTitle, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}
+
 // Create godoc
 // @Summary Crear película
 // @Description Crea una nueva película (recibe las URLs del frontend)

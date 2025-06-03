@@ -412,6 +412,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/movies/search": {
+            "get": {
+                "description": "Obtiene una lista de películas que coinciden con el título",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Obtener películas por título",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Título de la película",
+                        "name": "title",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Página (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "Límite por página (default 5)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Películas encontradas",
+                        "schema": {
+                            "$ref": "#/definitions/response.MovieTitleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Parámetros inválidos",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/movies/{id}": {
             "get": {
                 "description": "Obtiene todos los datos de una película",
@@ -1199,6 +1254,19 @@ const docTemplate = `{
                 "year": {
                     "description": "Año de lanzamiento\nrequired: true\nexample: 1972",
                     "type": "integer"
+                }
+            }
+        },
+        "response.MovieTitleResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Películas obtenidas\nrequired: true",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Título de la película\nrequired: true",
+                    "type": "string"
                 }
             }
         },

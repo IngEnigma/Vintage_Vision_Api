@@ -6,6 +6,7 @@ import (
 
 	"vintage-vision-api/internal/constants"
 	"vintage-vision-api/internal/domain"
+	"vintage-vision-api/internal/model/response"
 	"vintage-vision-api/internal/utils"
 	"vintage-vision-api/repository/entity"
 	"vintage-vision-api/repository/mapper"
@@ -138,4 +139,24 @@ func (r *MovieRepo) UpdateFields(ctx context.Context, id uint, updates map[strin
 	}
 	utils.Logger.Infof("%s ID %d", constants.MsgMovieUpdatedSuccessfully, id)
 	return nil
+}
+
+func (r *MovieRepo) GetMoviesByTitle(ctx context.Context, title string, page int, limit int) ([]response.MovieTitleResponse, error) {
+	var results []response.MovieTitleResponse
+
+	err := r.DB.WithContext(ctx).
+		Model(&entity.Movie{}).
+		Select("CAST(id AS TEXT) AS id, title").
+		Where("title ILIKE ?", "%"+title+"%").
+		Limit(limit).
+		Offset((page - 1) * limit).
+		Scan(&results).Error
+
+	if err != nil {
+		utils.Logger.Errorf("%s: %v", constants.ErrMsgGetMoviesByTitle, err)
+		return nil, err
+	}
+
+	utils.Logger.Infof("%s: %s", constants.MsgMoviesRetrievedByTitle, title)
+	return results, nil
 }
